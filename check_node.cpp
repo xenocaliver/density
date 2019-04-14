@@ -19,6 +19,7 @@
 #include <cmath>
 
 extern "C" {
+#include <complex.h>
 #include <fftw3.h>
 }
 

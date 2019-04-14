@@ -18,7 +18,8 @@
 #include <vector>
 
 extern "C" {
-    #include <fftw3.h>
+#include <complex.h>
+#include <fftw3.h>
 }
 
 namespace density {

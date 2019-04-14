@@ -19,9 +19,11 @@
 #include <cmath>
 #include <thread>
 #include <vector>
+#include <cstring>
 #include <boost/property_tree/json_parser.hpp>
 
 extern "C" {
+#include <complex.h>
 #include <fftw3.h>
 }
 
@@ -32,14 +34,6 @@ namespace density {
 extern fftw_complex* update_variable_node(std::vector<fftw_complex*>, fftw_complex*, uint64_t);
 extern fftw_complex* update_check_node(std::vector<fftw_complex*>, uint64_t);
 
-template<typename T> void fftw_memcpy(T* dest, T* src, uint64_t number_of_elements) {
-    uint64_t uli;
-
-    for(uli = 0; uli < number_of_elements; uli++) {
-        dest[uli][0] = src[uli][0];
-        dest[uli][1] = src[uli][1];
-    }
-}
 }
 
 int main(int argc, char* argv[]) {
@@ -49,7 +43,7 @@ int main(int argc, char* argv[]) {
     std::vector<fftw_complex*> variable_node_inputs(2, nullptr);
     std::vector<fftw_complex*> check_node_inputs(5, nullptr);
     fftw_complex* channel_input = (fftw_complex *)fftw_malloc(sizeof(fftw_complex)*vector_size);
-    double initial_dist = 1.0/(double)vector_size;
+    double initial_dist[2] = {1.0/(double)vector_size, 0.0};
 
     for(uli = 0; uli < 2; uli++) {
         ptr_fftw_complex = (fftw_complex *)fftw_malloc(sizeof(fftw_complex)*vector_size);
@@ -60,21 +54,24 @@ int main(int argc, char* argv[]) {
         check_node_inputs[uli] = ptr_fftw_complex;
     }
 
+
     /* initial distribution */
     for(uli = 0; uli < vector_size; uli++) {
-        variable_node_inputs[0][uli][0] = initial_dist; 
+        std::memcpy(variable_node_inputs[0] + uli, initial_dist, sizeof(fftw_complex));
     }
-    density::fftw_memcpy<fftw_complex>(variable_node_inputs[1], variable_node_inputs[0], vector_size);
-    density::fftw_memcpy<fftw_complex>(variable_node_inputs[2], variable_node_inputs[0], vector_size);
+    std::memcpy(variable_node_inputs[1], variable_node_inputs[0], sizeof(fftw_complex)*vector_size);
 
     /* channel inputs */
-    for(uli = 0; uli < vector_size; uli++) channel_input[uli][0] = density::fourier_gauss<double>((double)uli/vector_size, 0.5);
+    for(uli = 0; uli < vector_size; uli++) {
+        *(channel_input + uli)[0] = density::fourier_gauss<double>((double)uli/vector_size, 0.5);
+        *(channel_input + uli)[1] = 0.0;
+    }
 
     /*variable node calculation */
     ptr_fftw_complex = density::update_variable_node(variable_node_inputs, channel_input, vector_size);
     
     /* copy probability distribution */
-    for(uli = 0; uli < 5; uli++) density::fftw_memcpy<fftw_complex>(check_node_inputs[uli], ptr_fftw_complex, vector_size);
+    for(uli = 0; uli < 5; uli++) std::memcpy(check_node_inputs[uli], ptr_fftw_complex, sizeof(fftw_complex)*vector_size);
 
     /* free memrmoy */
     fftw_free(ptr_fftw_complex);
