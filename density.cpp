@@ -23,12 +23,15 @@
 #include <fstream>
 #include <boost/property_tree/json_parser.hpp>
 
+#include <QtWidgets/QApplication>
+#include <QtWidgets/QMainWindow>
+
 extern "C" {
 #include <fftw3.h>
 }
 #include "common.hpp"
 #include "fourier_gauss.hpp"
-#include "QWindows.hpp"
+#include "QViewpdf.hpp"
 
 namespace density {
 
@@ -45,6 +48,8 @@ double integrate_real_part(fftw_complex* pdf_real, uint64_t vector_size) {
     return(rtnv);
 }
 }
+
+QT_CHARTS_USE_NAMESPACE
 
 int main(int argc, char* argv[]) {
     uint64_t uli;
@@ -64,7 +69,7 @@ int main(int argc, char* argv[]) {
     std::ofstream ofs;
     QApplication app(argc, argv);
 
-    ViewPDF *v = new ViewPDF();
+    Viewpdf* v = new Viewpdf();
     v->show();
     app.exec();
 

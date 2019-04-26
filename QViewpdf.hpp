@@ -14,10 +14,22 @@
  * You should have received a copy of the GNU General Public License 
  * along with this program. If not, see <http://www.gnu.org/licenses/>
  */
-#include <QtWidgets/QApplication>
-#include <QtWidgets/QWidget>
+#ifndef QVIEWPDF_HPP
+#define QVIEWPDF_HPP
+#include <QtCharts/QChartView>
+#include <QtCharts/QScatterSeries>
+#include <QtCharts/QLegendMarker>
+#include <QtGui/QImage>
+#include <QtGui/QPainter>
 
-class ViewPDF : public QWidget {
+QT_CHARTS_USE_NAMESPACE
+
+class Viewpdf : public QChartView {
+    Q_OBJECT
 public:
-    ViewPDF(){}
+    Viewpdf(QWidget *parent = 0) : QChartView(new QChart(), parent) {
+        QScatterSeries *series = new QScatterSeries();
+    }
+    ~Viewpdf(){}
 };
+#endif // QVIEWPDF_HPP
