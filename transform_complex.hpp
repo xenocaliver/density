@@ -14,34 +14,16 @@
  * You should have received a copy of the GNU General Public License 
  * along with this program. If not, see <http://www.gnu.org/licenses/>
  */
-#include <iostream>
-#include <cstdint>
-#include <vector>
-#include <cmath>
-
+#include <complex>
 extern "C" {
-#include <complex.h>
 #include <fftw3.h>
 }
-
 namespace density {
-extern double* get_two_way_tanh_map(double*, double*, uint64_t);
-}
+std::complex<double> transform_to_complex(fftw_complex z) {
+    std::complex<double> rtnv;
 
-namespace density {
-
-double* update_check_node(std::vector<double*> input, uint64_t vector_size) {
-    uint64_t degree = input.size();
-    double* ptr_output;
-    double* ptr_tmp;
-    uint64_t uli;
-
-    ptr_output = get_two_way_tanh_map(input[0], input[1], vector_size);
-    for(uli = 2; uli < degree; uli++) {
-        ptr_tmp = get_two_way_tanh_map(input[uli], ptr_output, vector_size);
-        fftw_free(ptr_output);
-        ptr_output = ptr_tmp;
-    }
-    return(ptr_output);
+    rtnv.real(z[0]);
+    rtnv.imag(z[1]);
+    return(rtnv);
 }
 }
