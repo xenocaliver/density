@@ -68,6 +68,7 @@ int main(int argc, char* argv[]) {
     std::ofstream ofs;
     QApplication app(argc, argv);
     Plot delta_plot;
+    Plot awgn_plot;
     double* x;
     std::string curve_name;
 
@@ -77,8 +78,6 @@ int main(int argc, char* argv[]) {
         return(EXIT_FAILURE);
     }
     for(uli = 0; uli < vector_size; uli++) x[uli] = (double)uli;
-
-    delta_plot.resize(800, 600);
 
     for(uli = 0; uli < 2; uli++) {
         ptr_input = (fftw_complex *)fftw_malloc(sizeof(fftw_complex)*vector_size);
@@ -108,11 +107,26 @@ int main(int argc, char* argv[]) {
         variable_node_inputs[0][uli][1] = (double)0.0;
     }
 
+    // draw input delta function
+    delta_plot.resize(800, 600);
     delta_plot.setTitle("delta distribution");
     curve_name = R"(delta function)";
     delta_plot.setupCurve(curve_name);
+    delta_plot.setAxisScale(0, 0.0, 1.2, 0);
+    delta_plot.setAxisScale(2, 0.0, x[vector_size - 1] + 1.0, 0);
+    delta_plot.updateAxes();
     delta_plot.plotCurve(x, delta_distribution.data(), vector_size);
     delta_plot.show();
+
+    // draw input AWGN pdf
+    awgn_plot.resize(800, 600);
+    awgn_plot.setTitle("AWGN noise distribution");
+    curve_name = R"(AWGN)";
+    awgn_plot.setupCurve(curve_name);
+    awgn_plot.setAxisScale(2, 0.0, x[vector_size - 1] + 1.0, 0);
+    awgn_plot.updateAxes();
+    awgn_plot.plotCurve(x, initial_distribution.data(), vector_size);
+    awgn_plot.show();
 
     std::memcpy(variable_node_inputs[1], variable_node_inputs[0], sizeof(fftw_complex)*vector_size);
 
