@@ -21,6 +21,7 @@
 #include <vector>
 #include <cstring>
 #include <fstream>
+#include <string>
 #include <boost/property_tree/json_parser.hpp>
 
 #include <QtWidgets/QApplication>
@@ -31,7 +32,7 @@ extern "C" {
 }
 #include "common.hpp"
 #include "fourier_gauss.hpp"
-#include "QViewpdf.hpp"
+#include "plot.hpp"
 
 namespace density {
 
@@ -48,8 +49,6 @@ double integrate_real_part(fftw_complex* pdf_real, uint64_t vector_size) {
     return(rtnv);
 }
 }
-
-QT_CHARTS_USE_NAMESPACE
 
 int main(int argc, char* argv[]) {
     uint64_t uli;
@@ -68,10 +67,18 @@ int main(int argc, char* argv[]) {
     double* ptr_tmp;
     std::ofstream ofs;
     QApplication app(argc, argv);
+    Plot delta_plot;
+    double* x;
+    std::string curve_name;
 
-    Viewpdf* v = new Viewpdf();
-    v->show();
-    app.exec();
+    x = (double *)fftw_malloc(sizeof(double)*vector_size);
+    if(x == nullptr) {
+        std::cerr << "Can not allocate memory." << std::endl;
+        return(EXIT_FAILURE);
+    }
+    for(uli = 0; uli < vector_size; uli++) x[uli] = (double)uli;
+
+    delta_plot.resize(800, 600);
 
     for(uli = 0; uli < 2; uli++) {
         ptr_input = (fftw_complex *)fftw_malloc(sizeof(fftw_complex)*vector_size);
@@ -85,17 +92,10 @@ int main(int argc, char* argv[]) {
     /* initial distribution */
     initial_distribution = density::quantize_pdf(sigma);
     density::normalize_pdf(initial_distribution.data(), initial_distribution.size());
-    ofs.open("initial.txt");
-    if(!ofs) {
-        std::cerr << "Can not open file: initial.txt" << std::endl; 
-        return(EXIT_FAILURE);
-    }
     for(uli = 0; uli < vector_size; uli++) {
         channel_input[uli][0] = initial_distribution[uli];
         channel_input[uli][1] = (double)0.0;
-        ofs << channel_input[uli][0] << std::endl;
     }
-    ofs.close();
 
     plan = fftw_plan_dft_1d(vector_size, channel_input, channel_dft_input, FFTW_FORWARD, FFTW_ESTIMATE);
     fftw_execute(plan);
@@ -103,17 +103,16 @@ int main(int argc, char* argv[]) {
 
     delta_distribution = density::get_delta_function();
     density::normalize_pdf(delta_distribution.data(), delta_distribution.size());
-    ofs.open("delta.txt");
-    if(!ofs) {
-        std::cerr << "Can not open file: delta.txt" << std::endl;
-        return(EXIT_FAILURE);
-    }
     for(uli = 0; uli < vector_size; uli++) {
         variable_node_inputs[0][uli][0] = delta_distribution[uli];
         variable_node_inputs[0][uli][1] = (double)0.0;
-        ofs << variable_node_inputs[0][uli][0] << std::endl;
     }
-    ofs.close();
+
+    delta_plot.setTitle("delta distribution");
+    curve_name = R"(delta function)";
+    delta_plot.setupCurve(curve_name);
+    delta_plot.plotCurve(x, delta_distribution.data(), vector_size);
+    delta_plot.show();
 
     std::memcpy(variable_node_inputs[1], variable_node_inputs[0], sizeof(fftw_complex)*vector_size);
 
@@ -129,7 +128,7 @@ int main(int argc, char* argv[]) {
         for(uli = 0; uli < vector_size; uli++) ofs << ptr_double[uli] << std::endl;
         ofs.close();
         fftw_free(ptr_double);
-        return(EXIT_SUCCESS);
+        return(app.exec());
     /* copy probability distribution */
         for(uli = 0; uli < 5; uli++) std::memcpy(check_node_inputs[uli], ptr_double, sizeof(double)*vector_size);
 
@@ -147,5 +146,5 @@ int main(int argc, char* argv[]) {
 
     for(uli = 0; uli < 2; uli++) fftw_free(variable_node_inputs[uli]);
     for(uli = 0; uli < 5; uli++) fftw_free(check_node_inputs[uli]);
-    return(EXIT_SUCCESS);
+    return(app.exec());
 }

@@ -28,7 +28,7 @@ file(GLOB_RECURSE CPP_FILES *.cpp)
 
 include_directories(.)
 
-add_executable(density density.cpp check_node.cpp variable_node.cpp fourier_gauss.hpp transform_complex.hpp common.hpp QViewpdf.hpp QViewpdf.cpp)
+add_executable(density density.cpp check_node.cpp variable_node.cpp fourier_gauss.hpp transform_complex.hpp common.hpp plot.hpp plot.cpp)
 
-set(CMAKE_CXX_FLAGS "-O3 -Wall -g -fPIC -fmessage-length=0 -I/usr/local/include -I/usr/local/Cellar/qt/5.12.2/include -L/usr/local/lib")
-target_link_libraries(density LINK_PUBLIC Qt5::Widgets Qt5::Charts fftw3 pthread m)
+set(CMAKE_CXX_FLAGS "-O3 -Wall -g -fPIC -fmessage-length=0 -I/usr/local/include -I/usr/local/Cellar/qt/5.12.2/include -I/usr/local/Cellar/qwt/6.1.3_4/lib/qwt.framework/Versions/6/Headers -L/usr/local/lib")
+target_link_libraries(density LINK_PUBLIC Qt5::Widgets qwt fftw3 pthread m)
