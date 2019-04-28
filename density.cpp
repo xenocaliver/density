@@ -24,6 +24,7 @@
 #include <string>
 #include <boost/property_tree/json_parser.hpp>
 
+#include <QtCore>
 #include <QtWidgets/QApplication>
 #include <QtWidgets/QMainWindow>
 
@@ -48,6 +49,40 @@ double integrate_real_part(fftw_complex* pdf_real, uint64_t vector_size) {
     }
     return(rtnv);
 }
+
+void evolution(std::vector<fftw_complex*> variable_node_inputs, fftw_complex* channel_dft_input, std::vector<double*> check_node_inputs, uint64_t vector_size) {
+    uint64_t iteration;
+    double* ptr_double;
+    double probability;
+    uint64_t uli;
+
+    for(iteration = 0; iteration < 5; iteration++) {
+    /*variable node calculation */
+        ptr_double = density::update_variable_node(variable_node_inputs, channel_dft_input, vector_size);
+        density::normalize_pdf(ptr_double, vector_size);
+
+    /* caculating joint probability */
+        probability = density::get_error_probability(ptr_double);
+        std::cout << std::setw(8) << probability << std::endl;
+
+    /* copy probability distribution */
+        for(uli = 0; uli < 5; uli++) std::memcpy(check_node_inputs[uli], ptr_double, sizeof(double)*vector_size);
+
+    /* free memrmoy */
+        fftw_free(ptr_double);
+
+    /* check node calculation */
+        ptr_double = density::update_check_node(check_node_inputs, vector_size);
+        density::normalize_pdf(ptr_double, vector_size);
+
+        std::memcpy(variable_node_inputs[0], ptr_double, sizeof(double)*vector_size);
+        std::memcpy(variable_node_inputs[1], ptr_double, sizeof(double)*vector_size);
+        fftw_free(ptr_double);
+    }
+    for(uli = 0; uli < 2; uli++) fftw_free(variable_node_inputs[uli]);
+    for(uli = 0; uli < 5; uli++) fftw_free(check_node_inputs[uli]);
+}
+
 }
 
 int main(int argc, char* argv[]) {
@@ -56,16 +91,12 @@ int main(int argc, char* argv[]) {
     std::vector<double*> check_node_inputs(5, nullptr);
     fftw_complex* channel_input = (fftw_complex *)fftw_malloc(sizeof(fftw_complex)*vector_size);
     fftw_complex* channel_dft_input = (fftw_complex *)fftw_malloc(sizeof(fftw_complex)*vector_size);
-    double probability;
-    uint64_t iteration;
     std::vector<double> initial_distribution;
     std::vector<double> delta_distribution;
     double sigma = 0.5;
     fftw_complex* ptr_input;
     fftw_plan plan;
     double* ptr_double;
-    double* ptr_tmp;
-    std::ofstream ofs;
     QApplication app(argc, argv);
     Plot delta_plot;
     Plot awgn_plot;
@@ -130,35 +161,8 @@ int main(int argc, char* argv[]) {
 
     std::memcpy(variable_node_inputs[1], variable_node_inputs[0], sizeof(fftw_complex)*vector_size);
 
-    for(iteration = 0; iteration < 5; iteration++) {
-    /*variable node calculation */
-        ptr_double = density::update_variable_node(variable_node_inputs, channel_dft_input, vector_size);
-        density::normalize_pdf(ptr_double, vector_size);
+     std::thread evo_thread(density::evolution, variable_node_inputs, channel_dft_input, check_node_inputs, vector_size);
+     evo_thread.detach();
 
-    /* caculating joint probability */
-        probability = density::get_error_probability(ptr_double);
-        std::cout << std::setw(8) << probability << std::endl;
-        ofs.open("test" + std::to_string(iteration) + ".txt");
-        for(uli = 0; uli < vector_size; uli++) ofs << ptr_double[uli] << std::endl;
-        ofs.close();
-        fftw_free(ptr_double);
-        return(app.exec());
-    /* copy probability distribution */
-        for(uli = 0; uli < 5; uli++) std::memcpy(check_node_inputs[uli], ptr_double, sizeof(double)*vector_size);
-
-    /* free memrmoy */
-        fftw_free(ptr_double);
-
-    /* check node calculation */
-        ptr_double = density::update_check_node(check_node_inputs, vector_size);
-        density::normalize_pdf(ptr_double, vector_size);
-
-        std::memcpy(variable_node_inputs[0], ptr_double, sizeof(double)*vector_size);
-        std::memcpy(variable_node_inputs[1], ptr_double, sizeof(double)*vector_size);
-        fftw_free(ptr_double);
-    }
-
-    for(uli = 0; uli < 2; uli++) fftw_free(variable_node_inputs[uli]);
-    for(uli = 0; uli < 5; uli++) fftw_free(check_node_inputs[uli]);
     return(app.exec());
 }
