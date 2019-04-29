@@ -15,6 +15,9 @@ public:
     void setupCurve(std::string);
     void updateCurve(double*, double*, uint64_t);
 
+signals:
+    void emitSignal(void);
+
 private:
     QwtPlotCurve *curve1_;
 };

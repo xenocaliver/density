@@ -38,6 +38,6 @@ void Plot::setupCurve(std::string CurveName) {
 }
 
 void Plot::updateCurve(double* x, double* y, uint64_t array_size) {
-    this->plotCurve(x, y, array_size);
+    curve1_->setSamples(x, y, array_size);
 }
 #include "moc_plot.cpp"

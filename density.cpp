@@ -54,15 +54,13 @@ void evolution(std::vector<fftw_complex*> variable_node_inputs, fftw_complex* ch
     uint64_t iteration;
     double* ptr_double;
     double probability;
-    uint64_t uli;
     double* x;
+    uint64_t uli;
 
     x = (double *)fftw_malloc(sizeof(double)*vector_size);
     if(x == nullptr) {
         std::cerr << "Can not allocate memory." << std::endl;
-        for(uli = 0; uli < 2; uli++) fftw_free(variable_node_inputs[uli]);
-        for(uli = 0; uli < 5; uli++) fftw_free(check_node_inputs[uli]);
-        return;
+        exit(-1);
     }
     for(uli = 0; uli < vector_size; uli++) x[uli] = (double)uli;
 
@@ -72,6 +70,7 @@ void evolution(std::vector<fftw_complex*> variable_node_inputs, fftw_complex* ch
         density::normalize_pdf(ptr_double, vector_size);
 
         plot_app->updateCurve(x, ptr_double, vector_size);
+        plot_app->emitSignal();
     /* caculating joint probability */
         probability = density::get_error_probability(ptr_double);
         std::cout << std::setw(8) << probability << std::endl;
@@ -178,8 +177,8 @@ int main(int argc, char* argv[]) {
     probability_plot->setupCurve(curve_name);
     probability_plot->setAxisScale(2, 0.0, x[vector_size - 1] + 1.0, 0);
     probability_plot->updateAxes();
+    QObject::connect(probability_plot, SIGNAL(emitSignal()), probability_plot, SLOT(replot()));
     probability_plot->show();
-
 
     std::memcpy(variable_node_inputs[1], variable_node_inputs[0], sizeof(fftw_complex)*vector_size);
 
