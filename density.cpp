@@ -50,17 +50,28 @@ double integrate_real_part(fftw_complex* pdf_real, uint64_t vector_size) {
     return(rtnv);
 }
 
-void evolution(std::vector<fftw_complex*> variable_node_inputs, fftw_complex* channel_dft_input, std::vector<double*> check_node_inputs, uint64_t vector_size) {
+void evolution(std::vector<fftw_complex*> variable_node_inputs, fftw_complex* channel_dft_input, std::vector<double*> check_node_inputs, uint64_t vector_size, Plot* plot_app) {
     uint64_t iteration;
     double* ptr_double;
     double probability;
     uint64_t uli;
+    double* x;
+
+    x = (double *)fftw_malloc(sizeof(double)*vector_size);
+    if(x == nullptr) {
+        std::cerr << "Can not allocate memory." << std::endl;
+        for(uli = 0; uli < 2; uli++) fftw_free(variable_node_inputs[uli]);
+        for(uli = 0; uli < 5; uli++) fftw_free(check_node_inputs[uli]);
+        return;
+    }
+    for(uli = 0; uli < vector_size; uli++) x[uli] = (double)uli;
 
     for(iteration = 0; iteration < 5; iteration++) {
     /*variable node calculation */
         ptr_double = density::update_variable_node(variable_node_inputs, channel_dft_input, vector_size);
         density::normalize_pdf(ptr_double, vector_size);
 
+        plot_app->updateCurve(x, ptr_double, vector_size);
     /* caculating joint probability */
         probability = density::get_error_probability(ptr_double);
         std::cout << std::setw(8) << probability << std::endl;
@@ -98,8 +109,9 @@ int main(int argc, char* argv[]) {
     fftw_plan plan;
     double* ptr_double;
     QApplication app(argc, argv);
-    Plot delta_plot;
-    Plot awgn_plot;
+    Plot* delta_plot = new Plot();
+    Plot* awgn_plot = new Plot();
+    Plot* probability_plot = new Plot();
     double* x;
     std::string curve_name;
 
@@ -139,29 +151,39 @@ int main(int argc, char* argv[]) {
     }
 
     // draw input delta function
-    delta_plot.resize(800, 600);
-    delta_plot.setTitle("delta distribution");
+    delta_plot->resize(800, 600);
+    delta_plot->setTitle("delta distribution");
     curve_name = R"(delta function)";
-    delta_plot.setupCurve(curve_name);
-    delta_plot.setAxisScale(0, 0.0, 1.2, 0);
-    delta_plot.setAxisScale(2, 0.0, x[vector_size - 1] + 1.0, 0);
-    delta_plot.updateAxes();
-    delta_plot.plotCurve(x, delta_distribution.data(), vector_size);
-    delta_plot.show();
+    delta_plot->setupCurve(curve_name);
+    delta_plot->setAxisScale(0, 0.0, 1.2, 0);
+    delta_plot->setAxisScale(2, 0.0, x[vector_size - 1] + 1.0, 0);
+    delta_plot->updateAxes();
+    delta_plot->plotCurve(x, delta_distribution.data(), vector_size);
+    delta_plot->show();
 
     // draw input AWGN pdf
-    awgn_plot.resize(800, 600);
-    awgn_plot.setTitle("AWGN noise distribution");
+    awgn_plot->resize(800, 600);
+    awgn_plot->setTitle("AWGN noise distribution");
     curve_name = R"(AWGN)";
-    awgn_plot.setupCurve(curve_name);
-    awgn_plot.setAxisScale(2, 0.0, x[vector_size - 1] + 1.0, 0);
-    awgn_plot.updateAxes();
-    awgn_plot.plotCurve(x, initial_distribution.data(), vector_size);
-    awgn_plot.show();
+    awgn_plot->setupCurve(curve_name);
+    awgn_plot->setAxisScale(2, 0.0, x[vector_size - 1] + 1.0, 0);
+    awgn_plot->updateAxes();
+    awgn_plot->plotCurve(x, initial_distribution.data(), vector_size);
+    awgn_plot->show();
+
+    // draw probability density function 
+    probability_plot->resize(800, 600);
+    probability_plot->setTitle("probability density function");
+    curve_name = R"(probability function)";
+    probability_plot->setupCurve(curve_name);
+    probability_plot->setAxisScale(2, 0.0, x[vector_size - 1] + 1.0, 0);
+    probability_plot->updateAxes();
+    probability_plot->show();
+
 
     std::memcpy(variable_node_inputs[1], variable_node_inputs[0], sizeof(fftw_complex)*vector_size);
 
-     std::thread evo_thread(density::evolution, variable_node_inputs, channel_dft_input, check_node_inputs, vector_size);
+     std::thread evo_thread(density::evolution, variable_node_inputs, channel_dft_input, check_node_inputs, vector_size, probability_plot);
      evo_thread.detach();
 
     return(app.exec());

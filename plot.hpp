@@ -13,7 +13,7 @@ public:
     explicit Plot(QWidget *parent = 0);
     void plotCurve(double*, double*, uint64_t);
     void setupCurve(std::string);
-
+    void updateCurve(double*, double*, uint64_t);
 
 private:
     QwtPlotCurve *curve1_;

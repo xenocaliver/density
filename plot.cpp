@@ -37,4 +37,7 @@ void Plot::setupCurve(std::string CurveName) {
     curve1_->attach(this);
 }
 
+void Plot::updateCurve(double* x, double* y, uint64_t array_size) {
+    this->plotCurve(x, y, array_size);
+}
 #include "moc_plot.cpp"
