@@ -120,4 +120,22 @@ double* extract_real_part(fftw_complex* input, uint64_t vector_size) {
     return(ptr_double);
 
 }
+
+double* get_absolute_value(fftw_complex* input, uint64_t vector_size) {
+    uint64_t uli;
+    double* ptr_double;
+    double x;
+
+    ptr_double = (double *)fftw_malloc(sizeof(double)*vector_size);
+    if(ptr_double == nullptr) {
+        std::cerr << "Can not allocate memory." << std::endl;
+        exit(-1);
+    }
+
+    for(uli = 0; uli < vector_size; uli++) {
+        x = input[uli][0]*input[uli][0] + input[uli][1]*input[uli][1];
+        ptr_double[uli] = std::sqrt(x);
+    }
+    return(ptr_double);
+}
 }

@@ -34,12 +34,12 @@ namespace density {
         std::vector<double> rtnv(vector_size, 0.0);
         int64_t i;
 
-        for(i = half_lower_bound; i < upper_bound + 1; i++) {
+        for(i = half_lower_bound; i < half_upper_bound + 1; i++) {
             left_variable = delta*i - 0.5*delta;
             right_variable = delta*i + 0.5*delta;
             left_pdf_value = get_llr_pdf(left_variable, sigma);
             right_pdf_value = get_llr_pdf(right_variable, sigma);
-            rtnv[i + upper_bound] = 0.5*(left_pdf_value + right_pdf_value);
+            rtnv[i + upper_bound + half_upper_bound] = 0.5*(left_pdf_value + right_pdf_value);
         }
         for(i = lower_bound; i < half_lower_bound; i++) rtnv[i + upper_bound] = 0.0;
         //for(i = half_upper_bound + 1; i < upper_bound; i++) rtnv[i] = 0.0;

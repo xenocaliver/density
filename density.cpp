@@ -40,23 +40,14 @@ namespace density {
 extern fftw_complex* update_variable_node(std::vector<fftw_complex*>, fftw_complex*, uint64_t);
 extern double* update_check_node(std::vector<double*>, uint64_t);
 extern double* extract_real_part(fftw_complex*, uint64_t);
-
-double integrate_real_part(fftw_complex* pdf_real, uint64_t vector_size) {
-    uint64_t uli;
-    double rtnv = 0.0;
-
-    for(uli = 0; uli < vector_size; uli++) {
-        rtnv += pdf_real[uli][0];
-    }
-    return(rtnv);
-}
+extern double* get_absolute_value(fftw_complex*, uint64_t); 
 
 void evolution(std::vector<fftw_complex*> variable_node_inputs, fftw_complex* channel_dft_input, std::vector<double*> check_node_inputs, uint64_t vector_size, Plot* plot_app) {
     uint64_t iteration;
     double* ptr_double;
     double probability;
     double* x;
-    uint64_t uli;
+    uint64_t uli, ulj;
     std::vector<fftw_complex*> v(1, nullptr);
     fftw_complex* ptr_complex;
     fftw_complex* ptr_result;
@@ -75,10 +66,9 @@ void evolution(std::vector<fftw_complex*> variable_node_inputs, fftw_complex* ch
     /* get joint probability density */
         v[0] = variable_node_inputs[0];
         ptr_result = density::update_variable_node(v, ptr_complex, vector_size);
-        fftw_free(ptr_complex);
 
     /* extract real part */
-        ptr_double = density::extract_real_part(ptr_result, vector_size);
+        ptr_double = density::get_absolute_value(ptr_result, vector_size);
         fftw_free(ptr_result);
         normalize_pdf(ptr_double, vector_size);
 
@@ -89,6 +79,11 @@ void evolution(std::vector<fftw_complex*> variable_node_inputs, fftw_complex* ch
     /* caculating joint probability */
         probability = density::get_error_probability(ptr_double);
         std::cout << std::setw(8) << probability << std::endl;
+        fftw_free(ptr_double);
+
+    /* extract real part */
+        ptr_double = density::get_absolute_value(ptr_complex, vector_size);
+        fftw_free(ptr_complex);
 
     /* copy probability distribution */
         for(uli = 0; uli < 5; uli++) std::memcpy(check_node_inputs[uli], ptr_double, sizeof(double)*vector_size);
@@ -100,8 +95,13 @@ void evolution(std::vector<fftw_complex*> variable_node_inputs, fftw_complex* ch
         ptr_double = density::update_check_node(check_node_inputs, vector_size);
         density::normalize_pdf(ptr_double, vector_size);
 
-        std::memcpy(variable_node_inputs[0], ptr_double, sizeof(double)*vector_size);
-        std::memcpy(variable_node_inputs[1], ptr_double, sizeof(double)*vector_size);
+    /* copy memory */
+        for(uli = 0; uli < 2; uli++) {
+            for(ulj = 0; ulj < vector_size; ulj++) {
+                variable_node_inputs[uli][ulj][0] = ptr_double[ulj];
+                variable_node_inputs[uli][ulj][1] = (double)0.0;
+            }
+        }
         fftw_free(ptr_double);
     }
     for(uli = 0; uli < 2; uli++) fftw_free(variable_node_inputs[uli]);
@@ -118,7 +118,7 @@ int main(int argc, char* argv[]) {
     fftw_complex* channel_dft_input = (fftw_complex *)fftw_malloc(sizeof(fftw_complex)*vector_size);
     std::vector<double> initial_distribution;
     std::vector<double> delta_distribution;
-    double sigma = 1.0;
+    double sigma = 0.5;
     fftw_complex* ptr_input;
     fftw_plan plan;
     double* ptr_double;
