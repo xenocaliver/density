@@ -59,7 +59,7 @@ void evolution(std::vector<fftw_complex*> variable_node_inputs, fftw_complex* ch
     }
     for(uli = 0; uli < vector_size; uli++) x[uli] = (double)uli;
 
-    for(iteration = 0; iteration < 5; iteration++) {
+    for(iteration = 0; iteration < 40; iteration++) {
     /*variable node calculation */
         ptr_complex = density::update_variable_node(variable_node_inputs, channel_dft_input, vector_size);
     
@@ -118,7 +118,7 @@ int main(int argc, char* argv[]) {
     fftw_complex* channel_dft_input = (fftw_complex *)fftw_malloc(sizeof(fftw_complex)*vector_size);
     std::vector<double> initial_distribution;
     std::vector<double> delta_distribution;
-    double sigma = 0.5;
+    double sigma = 0.1;
     fftw_complex* ptr_input;
     fftw_plan plan;
     double* ptr_double;
