@@ -37,8 +37,9 @@ extern "C" {
 
 namespace density {
 
-extern double* update_variable_node(std::vector<fftw_complex*>, fftw_complex*, uint64_t);
+extern fftw_complex* update_variable_node(std::vector<fftw_complex*>, fftw_complex*, uint64_t);
 extern double* update_check_node(std::vector<double*>, uint64_t);
+extern double* extract_real_part(fftw_complex*, uint64_t);
 
 double integrate_real_part(fftw_complex* pdf_real, uint64_t vector_size) {
     uint64_t uli;
@@ -56,6 +57,9 @@ void evolution(std::vector<fftw_complex*> variable_node_inputs, fftw_complex* ch
     double probability;
     double* x;
     uint64_t uli;
+    std::vector<fftw_complex*> v(1, nullptr);
+    fftw_complex* ptr_complex;
+    fftw_complex* ptr_result;
 
     x = (double *)fftw_malloc(sizeof(double)*vector_size);
     if(x == nullptr) {
@@ -66,11 +70,22 @@ void evolution(std::vector<fftw_complex*> variable_node_inputs, fftw_complex* ch
 
     for(iteration = 0; iteration < 5; iteration++) {
     /*variable node calculation */
-        ptr_double = density::update_variable_node(variable_node_inputs, channel_dft_input, vector_size);
-        density::normalize_pdf(ptr_double, vector_size);
+        ptr_complex = density::update_variable_node(variable_node_inputs, channel_dft_input, vector_size);
+    
+    /* get joint probability density */
+        v[0] = variable_node_inputs[0];
+        ptr_result = density::update_variable_node(v, ptr_complex, vector_size);
+        fftw_free(ptr_complex);
 
+    /* extract real part */
+        ptr_double = density::extract_real_part(ptr_result, vector_size);
+        fftw_free(ptr_result);
+        normalize_pdf(ptr_double, vector_size);
+
+    /* update graph */
         plot_app->updateCurve(x, ptr_double, vector_size);
         plot_app->emitSignal();
+
     /* caculating joint probability */
         probability = density::get_error_probability(ptr_double);
         std::cout << std::setw(8) << probability << std::endl;
@@ -103,7 +118,7 @@ int main(int argc, char* argv[]) {
     fftw_complex* channel_dft_input = (fftw_complex *)fftw_malloc(sizeof(fftw_complex)*vector_size);
     std::vector<double> initial_distribution;
     std::vector<double> delta_distribution;
-    double sigma = 0.5;
+    double sigma = 1.0;
     fftw_complex* ptr_input;
     fftw_plan plan;
     double* ptr_double;

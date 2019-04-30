@@ -28,15 +28,13 @@ extern "C" {
 
 namespace density {
 
-double* update_variable_node(std::vector<fftw_complex*> input, fftw_complex* channel_input, uint64_t vector_size) {
-    //uint64_t degree = input.size();
-    uint64_t degree = 1;
+fftw_complex* update_variable_node(std::vector<fftw_complex*> input, fftw_complex* channel_input, uint64_t vector_size) {
+    uint64_t degree = input.size();
     fftw_complex* ptr_conv_result;
     fftw_complex* ptr_inverse_transform_result;
     std::vector<fftw_complex*> ptr_fftw_out(degree, nullptr);
     fftw_plan plan;
     uint64_t uli, ulj;
-    double* ptr_double;
     std::vector<std::vector<std::complex<double> > > complex_input(degree, std::vector<std::complex<double> >(vector_size, (std::complex<double>)0.0));
     std::vector<std::complex<double> > conv_result(vector_size, (std::complex<double>)0.0);
     std::vector<std::complex<double> > complex_channel_input(vector_size, (std::complex<double>)0.0);
@@ -82,19 +80,9 @@ double* update_variable_node(std::vector<fftw_complex*> input, fftw_complex* cha
     for(uli = 1; uli < degree; uli++) {
         for(ulj = 0; ulj < vector_size; ulj++) conv_result[ulj] *= complex_input[uli][ulj];
     }
-    //std::memcpy(ptr_conv_result, ptr_fftw_out[0], sizeof(fftw_complex)*vector_size);
-    //for(uli = 1; uli < degree; uli++) {
-    //    for(ulj = 0; ulj < vector_size; ulj++) {
-    //        ptr_conv_result[ulj][0] = ptr_conv_result[ulj][0]*ptr_fftw_out[uli][ulj][0] - ptr_conv_result[ulj][1]*ptr_fftw_out[uli][ulj][1];
-    //        ptr_conv_result[ulj][1] = ptr_conv_result[ulj][1]*ptr_fftw_out[uli][ulj][0] + ptr_conv_result[ulj][0]*ptr_fftw_out[uli][ulj][1];
-    //    }
-    //}
 
     for(ulj = 0; ulj < vector_size; ulj++) conv_result[ulj] *= complex_channel_input[ulj];
-    //for(ulj = 0; ulj < vector_size; ulj++) {
-    //    ptr_conv_result[ulj][0] = ptr_conv_result[ulj][0]*channel_input[ulj][0] - ptr_conv_result[ulj][1]*channel_input[ulj][1];
-    //    ptr_conv_result[ulj][1] = ptr_conv_result[ulj][1]*channel_input[ulj][0] + ptr_conv_result[ulj][0]*channel_input[ulj][1];
-    //}
+
     for(ulj = 0; ulj < vector_size; ulj++) {
         ptr_conv_result[ulj][0] = conv_result[ulj].real();
         ptr_conv_result[ulj][1] = conv_result[ulj].imag();
@@ -106,21 +94,30 @@ double* update_variable_node(std::vector<fftw_complex*> input, fftw_complex* cha
 
     for(ulj = 0; ulj < vector_size; ulj++) {
         ptr_inverse_transform_result[ulj][0] = ptr_inverse_transform_result[ulj][0]/(double)vector_size;
+        ptr_inverse_transform_result[ulj][1] = ptr_inverse_transform_result[ulj][1]/(double)vector_size;
     }
-    ptr_double = (double *)fftw_malloc(sizeof(double)*vector_size);
-    if(ptr_double == nullptr) {
-        std::cerr << "<variable node update> Can not allocate memory." << std::endl;
-        exit(-1);
-    }
-    /* copy real part */
-    for(uli = 0; uli < vector_size; uli++) ptr_double[uli] = ptr_inverse_transform_result[uli][0];
+
 /* free memory */
     for(uli = 0; uli < degree; uli++) {
         fftw_free(ptr_fftw_out[uli]);
     }
     fftw_free(ptr_conv_result);
-    fftw_free(ptr_inverse_transform_result);
+
+    return(ptr_inverse_transform_result);
+}
+
+double* extract_real_part(fftw_complex* input, uint64_t vector_size) {
+    uint64_t uli;
+    double* ptr_double;
+
+    ptr_double = (double *)fftw_malloc(sizeof(double)*vector_size);
+    if(ptr_double == nullptr) {
+        std::cerr << "Can not allocate memory." << std::endl;
+        exit(-1);
+    }
+    for(uli = 0; uli < vector_size; uli++) ptr_double[uli] = input[uli][0];
 
     return(ptr_double);
+
 }
 }
