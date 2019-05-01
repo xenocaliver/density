@@ -37,20 +37,17 @@ extern "C" {
 
 namespace density {
 
-extern fftw_complex* update_variable_node(std::vector<fftw_complex*>, fftw_complex*, uint64_t);
+extern double* update_variable_node(std::vector<double*>, fftw_complex*, uint64_t);
 extern double* update_check_node(std::vector<double*>, uint64_t);
-extern double* extract_real_part(fftw_complex*, uint64_t);
-extern double* get_absolute_value(fftw_complex*, uint64_t); 
 
-void evolution(std::vector<fftw_complex*> variable_node_inputs, fftw_complex* channel_dft_input, std::vector<double*> check_node_inputs, uint64_t vector_size, Plot* plot_app) {
+void evolution(std::vector<double*> variable_node_inputs, fftw_complex* channel_dft_input, std::vector<double*> check_node_inputs, uint64_t vector_size, Plot* plot_app) {
     uint64_t iteration;
     double* ptr_double;
+    double* ptr_result;
     double probability;
     double* x;
     uint64_t uli, ulj;
-    std::vector<fftw_complex*> v(2, nullptr);
-    fftw_complex* ptr_complex;
-    fftw_complex* ptr_result;
+    std::vector<double*> v(variable_node_inputs.size() + 1, nullptr);
 
     x = (double *)fftw_malloc(sizeof(double)*vector_size);
     if(x == nullptr) {
@@ -59,33 +56,32 @@ void evolution(std::vector<fftw_complex*> variable_node_inputs, fftw_complex* ch
     }
     for(uli = 0; uli < vector_size; uli++) x[uli] = (double)uli;
 
+    for(uli = 0; uli < v.size(); uli++) {
+        v[uli] = (double *)fftw_malloc(sizeof(double)*vector_size);
+        if(v[uli] == nullptr) {
+            std::cerr << "Can not allocate memory." << std::endl;
+            exit(-1);
+        }
+    }
+
     for(iteration = 0; iteration < 40; iteration++) {
     /*variable node calculation */
-        ptr_complex = density::update_variable_node(variable_node_inputs, channel_dft_input, vector_size);
+        ptr_double = density::update_variable_node(variable_node_inputs, channel_dft_input, vector_size);
     
     /* get joint probability density */
-        v[0] = ptr_complex;
-        v[1] = variable_node_inputs[0];
+        for(uli = 0; uli < v.size(); uli++) std::memcpy(v[uli], ptr_double, sizeof(double)*vector_size);
         ptr_result = density::update_variable_node(v, channel_dft_input, vector_size);
-
-    /* extract real part */
-        ptr_double = density::get_absolute_value(ptr_result, vector_size);
-        fftw_free(ptr_result);
-        normalize_pdf(ptr_double, vector_size);
+        normalize_pdf(ptr_result, vector_size);
 
     /* update graph */
-        plot_app->updateCurve(x, ptr_double, vector_size);
+        plot_app->updateCurve(x, ptr_result, vector_size);
         plot_app->emitSignal();
 
     /* caculating joint probability */
-        probability = density::get_error_probability(ptr_double);
+        probability = density::get_error_probability(ptr_result);
         std::cout << std::setw(8) << probability << std::endl;
-        fftw_free(ptr_double);
 
-    /* extract real part */
-        ptr_double = density::get_absolute_value(ptr_complex, vector_size);
-        fftw_free(ptr_complex);
-
+        fftw_free(ptr_result);
     /* copy probability distribution */
         for(uli = 0; uli < 5; uli++) std::memcpy(check_node_inputs[uli], ptr_double, sizeof(double)*vector_size);
 
@@ -99,28 +95,28 @@ void evolution(std::vector<fftw_complex*> variable_node_inputs, fftw_complex* ch
     /* copy memory */
         for(uli = 0; uli < 2; uli++) {
             for(ulj = 0; ulj < vector_size; ulj++) {
-                variable_node_inputs[uli][ulj][0] = ptr_double[ulj];
-                variable_node_inputs[uli][ulj][1] = (double)0.0;
+                variable_node_inputs[uli][ulj] = ptr_double[ulj];
             }
         }
         fftw_free(ptr_double);
     }
     for(uli = 0; uli < 2; uli++) fftw_free(variable_node_inputs[uli]);
     for(uli = 0; uli < 5; uli++) fftw_free(check_node_inputs[uli]);
+    for(uli = 0; uli < v.size(); uli++) fftw_free(v[uli]);
 }
 
 }
 
 int main(int argc, char* argv[]) {
     uint64_t uli;
-    std::vector<fftw_complex*> variable_node_inputs(2, nullptr);
+    std::vector<double*> variable_node_inputs(2, nullptr);
     std::vector<double*> check_node_inputs(5, nullptr);
-    fftw_complex* channel_input = (fftw_complex *)fftw_malloc(sizeof(fftw_complex)*vector_size);
-    fftw_complex* channel_dft_input = (fftw_complex *)fftw_malloc(sizeof(fftw_complex)*vector_size);
+    double* channel_input = (double *)fftw_malloc(sizeof(double)*vector_size);
+    fftw_complex* channel_dft_input = (fftw_complex *)fftw_malloc(sizeof(fftw_complex)*complex_vector_size);
     std::vector<double> initial_distribution;
     std::vector<double> delta_distribution;
     double sigma = 0.1;
-    fftw_complex* ptr_input;
+    double* ptr_input;
     fftw_plan plan;
     double* ptr_double;
     QApplication app(argc, argv);
@@ -138,11 +134,19 @@ int main(int argc, char* argv[]) {
     for(uli = 0; uli < vector_size; uli++) x[uli] = (double)uli;
 
     for(uli = 0; uli < 2; uli++) {
-        ptr_input = (fftw_complex *)fftw_malloc(sizeof(fftw_complex)*vector_size);
+        ptr_input = (double *)fftw_malloc(sizeof(double)*vector_size);
+        if(ptr_input == nullptr) {
+            std::cerr << "Can not allocate memory." << std::endl;
+            exit(-1);
+        }
         variable_node_inputs[uli] = ptr_input;
     }
     for(uli = 0; uli < 5; uli++) {
         ptr_double = (double *)fftw_malloc(sizeof(double)*vector_size);
+        if(ptr_double == nullptr) {
+            std::cerr << "Can not allocate memory." << std::endl;
+            exit(-1);
+        }
         check_node_inputs[uli] = ptr_double;
     }
 
@@ -150,19 +154,17 @@ int main(int argc, char* argv[]) {
     initial_distribution = density::quantize_pdf(sigma);
     density::normalize_pdf(initial_distribution.data(), initial_distribution.size());
     for(uli = 0; uli < vector_size; uli++) {
-        channel_input[uli][0] = initial_distribution[uli];
-        channel_input[uli][1] = (double)0.0;
+        channel_input[uli] = initial_distribution[uli];
     }
 
-    plan = fftw_plan_dft_1d(vector_size, channel_input, channel_dft_input, FFTW_FORWARD, FFTW_ESTIMATE);
+    plan = fftw_plan_dft_r2c_1d(vector_size, channel_input, channel_dft_input, FFTW_ESTIMATE);
     fftw_execute(plan);
     fftw_destroy_plan(plan);
 
     delta_distribution = density::get_delta_function();
     density::normalize_pdf(delta_distribution.data(), delta_distribution.size());
     for(uli = 0; uli < vector_size; uli++) {
-        variable_node_inputs[0][uli][0] = delta_distribution[uli];
-        variable_node_inputs[0][uli][1] = (double)0.0;
+        variable_node_inputs[0][uli] = delta_distribution[uli];
     }
 
     // draw input delta function
@@ -196,7 +198,7 @@ int main(int argc, char* argv[]) {
     QObject::connect(probability_plot, SIGNAL(emitSignal()), probability_plot, SLOT(replot()));
     probability_plot->show();
 
-    std::memcpy(variable_node_inputs[1], variable_node_inputs[0], sizeof(fftw_complex)*vector_size);
+    std::memcpy(variable_node_inputs[1], variable_node_inputs[0], sizeof(double)*vector_size);
 
      std::thread evo_thread(density::evolution, variable_node_inputs, channel_dft_input, check_node_inputs, vector_size, probability_plot);
      evo_thread.detach();

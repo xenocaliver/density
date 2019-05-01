@@ -19,6 +19,7 @@
 #include <cstdint>
 
 constexpr uint64_t vector_size = 16384;
+constexpr uint64_t complex_vector_size = vector_size/2 + 1;
 constexpr int64_t upper_bound = (vector_size - 1)/2;
 constexpr int64_t lower_bound = -(int64_t)(vector_size - 1)/2;
 constexpr int64_t half_upper_bound = (vector_size - 1)/4;
