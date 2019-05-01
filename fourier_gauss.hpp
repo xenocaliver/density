@@ -19,10 +19,9 @@
 #include <vector>
 
 namespace density {
-    double get_llr_pdf(double x, double sigma) {
+    double get_llr_pdf(double x, double mean, double sigma) {
         double rtnv;
         double variance = sigma*sigma;
-        double mean = 2.0*variance;
 
         rtnv = exp(-0.5*(x - mean)*(x - mean)/variance)/sqrt(2.0*M_PI*variance);
         return(rtnv);
@@ -33,15 +32,16 @@ namespace density {
         double left_pdf_value, right_pdf_value;
         std::vector<double> rtnv(vector_size, 0.0);
         int64_t i;
+        double mean = ((double)half_upper_bound)*delta;
 
-        for(i = half_lower_bound; i < half_upper_bound + 1; i++) {
+        for(i = half_lower_bound; i < upper_bound + 1; i++) {
             left_variable = delta*i - 0.5*delta;
             right_variable = delta*i + 0.5*delta;
-            left_pdf_value = get_llr_pdf(left_variable, sigma);
-            right_pdf_value = get_llr_pdf(right_variable, sigma);
-            rtnv[i + upper_bound + half_upper_bound] = 0.5*(left_pdf_value + right_pdf_value);
+            left_pdf_value = get_llr_pdf(left_variable, mean, sigma);
+            right_pdf_value = get_llr_pdf(right_variable, mean, sigma);
+            rtnv[i + upper_bound] = 0.5*(left_pdf_value + right_pdf_value);
         }
-        for(i = lower_bound; i < half_lower_bound; i++) rtnv[i + upper_bound] = 0.0;
+        //for(i = lower_bound; i < half_lower_bound; i++) rtnv[i + upper_bound] = 0.0;
         //for(i = half_upper_bound + 1; i < upper_bound; i++) rtnv[i] = 0.0;
         return(rtnv);
     }

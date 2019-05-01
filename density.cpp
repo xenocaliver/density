@@ -48,7 +48,7 @@ void evolution(std::vector<fftw_complex*> variable_node_inputs, fftw_complex* ch
     double probability;
     double* x;
     uint64_t uli, ulj;
-    std::vector<fftw_complex*> v(1, nullptr);
+    std::vector<fftw_complex*> v(2, nullptr);
     fftw_complex* ptr_complex;
     fftw_complex* ptr_result;
 
@@ -59,13 +59,14 @@ void evolution(std::vector<fftw_complex*> variable_node_inputs, fftw_complex* ch
     }
     for(uli = 0; uli < vector_size; uli++) x[uli] = (double)uli;
 
-    for(iteration = 0; iteration < 5; iteration++) {
+    for(iteration = 0; iteration < 10; iteration++) {
     /*variable node calculation */
         ptr_complex = density::update_variable_node(variable_node_inputs, channel_dft_input, vector_size);
     
     /* get joint probability density */
         v[0] = variable_node_inputs[0];
-        ptr_result = density::update_variable_node(v, ptr_complex, vector_size);
+        v[1] = ptr_complex;
+        ptr_result = density::update_variable_node(v, channel_dft_input, vector_size);
 
     /* extract real part */
         ptr_double = density::get_absolute_value(ptr_result, vector_size);
