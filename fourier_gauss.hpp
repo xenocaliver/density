@@ -67,24 +67,7 @@ namespace density {
         return(sum);
     }
 
-    std::vector<double> clip_pdf(std::vector<double> pdf) {
-        std::vector<double> rtnv(vector_size, 0.0);
-        double sum = 0.0;
-        int64_t i;
-		for(i = lower_bound + upper_bound; i < upper_bound + half_lower_bound; i++) {
-			sum += pdf[i];
-			rtnv[i] = 0.0;
-		}
-		rtnv[half_lower_bound + upper_bound] +=sum;
-		sum = 0.0;
-		for(i = upper_bound + half_upper_bound + 1; i < (int64_t)vector_size; i++) {
-			sum += pdf[i];
-			rtnv[i] = 0.0;
-		}
-		rtnv[half_upper_bound + upper_bound] += sum;
-        return(rtnv);
-	}
-
+ 
     std::vector<double> get_delta_function(void) {
         std::vector<double> rtnv(vector_size, 0.0);
         uint64_t uli;
@@ -97,7 +80,7 @@ namespace density {
     int64_t quasi_gallager(int64_t x, int64_t y, uint64_t vector_size) {
         double a, b;
         double z = 0.0;
-       uint64_t rtnv;
+        uint64_t rtnv;
 
         a = 0.5*((double)x)*delta;
         b = 0.5*((double)y)*delta;

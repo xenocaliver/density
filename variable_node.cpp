@@ -23,11 +23,26 @@
 extern "C" {
 #include <fftw3.h>
 }
-
+#include "common.hpp"
 #include "transform_complex.hpp"
 
 namespace density {
+void clip_pdf(double* pdf, uint64_t vector_size) {
+	int64_t i;
+	double sum = 0.0;
 
+	for (i = lower_bound + upper_bound; i < upper_bound + half_lower_bound; i++) {
+		sum += pdf[i];
+		pdf[i] = 0.0;
+	}
+	pdf[half_lower_bound + upper_bound] +=sum;
+	sum = 0.0;
+	for (i = upper_bound + half_upper_bound + 1; i < (int64_t)vector_size; i++) {
+		sum += pdf[i];
+	    pdf[i] = 0.0;
+	}
+	pdf[half_upper_bound + upper_bound] += sum;
+}
 double* update_variable_node(std::vector<double*> input, fftw_complex* channel_input, uint64_t vector_size) {
     uint64_t degree = input.size();
     uint64_t complex_vector_size = vector_size/2 + 1;
@@ -109,7 +124,7 @@ double* update_variable_node(std::vector<double*> input, fftw_complex* channel_i
     fftw_destroy_plan(plan);
 
     for(ulj = 0; ulj < vector_size; ulj++) {
-        ptr_inverse_transform_result[ulj] = ptr_inverse_transform_result[ulj]/(double)vector_size;
+        ptr_inverse_transform_result[ulj] = ptr_inverse_transform_result[ulj]*delta/(double)vector_size;
     }
 
 /* free memory */
