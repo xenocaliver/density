@@ -122,7 +122,7 @@ int main(int argc, char* argv[]) {
     fftw_complex* channel_dft_input = (fftw_complex *)fftw_malloc(sizeof(fftw_complex)*vector_size);
     std::vector<double> initial_distribution;
     std::vector<double> delta_distribution;
-    double sigma = 0.5;
+    double sigma = 0.16;
     fftw_complex* ptr_input;
     fftw_plan plan;
     double* ptr_double;

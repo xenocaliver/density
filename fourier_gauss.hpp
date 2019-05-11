@@ -22,8 +22,8 @@ namespace density {
     double get_llr_pdf(double x, double sigma) {
         double rtnv;
         double variance = sigma*sigma;
-        double mean = 2.0*variance;
-        double var = 4.0*variance;
+        double mean = 2.0/variance;
+        double var = 4.0/variance;
 
         rtnv = exp(-0.5*(x - mean)*(x - mean)/var)/sqrt(2.0*pi*var);
         return(rtnv);
@@ -42,8 +42,8 @@ namespace density {
             right_pdf_value = get_llr_pdf(right_variable, sigma);
             rtnv[i + upper_bound] = 0.5*(left_pdf_value + right_pdf_value);
         }
-        //for(i = lower_bound; i < half_lower_bound; i++) rtnv[i + upper_bound] = 0.0;
-        //for(i = half_upper_bound + 1; i < upper_bound; i++) rtnv[i] = 0.0;
+        for(i = lower_bound; i < half_lower_bound; i++) rtnv[i + upper_bound] = 0.0;
+        for(i = half_upper_bound + 1; i < upper_bound; i++) rtnv[i] = 0.0;
         return(rtnv);
     }
 
