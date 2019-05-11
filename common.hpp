@@ -18,10 +18,11 @@
 #include <cstdlib>
 #include <cstdint>
 
-constexpr uint64_t vector_size = 16384;
+constexpr uint64_t vector_size = (1 << 12) - 1;
 constexpr int64_t upper_bound = (vector_size - 1)/2;
 constexpr int64_t lower_bound = -(int64_t)(vector_size - 1)/2;
 constexpr int64_t half_upper_bound = (vector_size - 1)/4;
 constexpr int64_t half_lower_bound = -(int64_t)(vector_size - 1)/4;
 constexpr double delta = 0.05;
 constexpr double error_probability_threshold = 1.0e-6;
+constexpr double pi = 3.14159265358979323846264338327950288;

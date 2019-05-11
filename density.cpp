@@ -47,6 +47,7 @@ void evolution(std::vector<fftw_complex*> variable_node_inputs, fftw_complex* ch
     double* x;
     uint64_t uli, ulj;
     int64_t i;
+    std::vector<fftw_complex*> v(variable_node_inputs.size() + 1, nullptr);
 
     x = (double *)fftw_malloc(sizeof(double)*vector_size);
     if(x == nullptr) {
@@ -55,20 +56,20 @@ void evolution(std::vector<fftw_complex*> variable_node_inputs, fftw_complex* ch
     }
     for(i = 0; i < (int64_t)vector_size; i++) x[i] = (double)(i - upper_bound)*delta;
 
-    for(iteration = 0; iteration < 40; iteration++) {
+    for(uli = 0; uli < v.size(); uli++) {
+        v[uli] = (fftw_complex *)fftw_malloc(sizeof(fftw_complex)*vector_size);
+        if(v[uli] == nullptr) {
+            std::cerr << "Can not allocate memory." << std::endl;
+            exit(-1);
+        }
+    }
+
+    for(iteration = 0; iteration < 1000; iteration++) {
     /*variable node calculation */
         ptr_double = density::update_variable_node(variable_node_inputs, channel_dft_input, vector_size);
     
     /* extract real part */
         normalize_pdf(ptr_double, vector_size);
-
-    /* update graph */
-        plot_app->updateCurve(x, ptr_double, vector_size);
-        plot_app->emitSignal();
-
-    /* caculating joint probability */
-        probability = density::get_error_probability(ptr_double);
-        std::cout << std::setw(8) << probability << std::endl;
 
     /* copy probability distribution */
         for(uli = 0; uli < 5; uli++) std::memcpy(check_node_inputs[uli], ptr_double, sizeof(double)*vector_size);
@@ -88,9 +89,27 @@ void evolution(std::vector<fftw_complex*> variable_node_inputs, fftw_complex* ch
             }
         }
         fftw_free(ptr_double);
+        for(uli = 0; uli < v.size(); uli++) std::memcpy(v[uli], variable_node_inputs[0], sizeof(fftw_complex)*vector_size);
+    /* calculate joint probability */
+        ptr_double = density::update_variable_node(v, channel_dft_input, vector_size);
+    
+    /* extract real part */
+        normalize_pdf(ptr_double, vector_size);
+
+    /* caculating joint probability */
+        probability = density::get_error_probability(ptr_double);
+        std::cout << std::setw(8) << probability << std::endl;
+
+    /* update graph */
+        plot_app->updateCurve(x, ptr_double, vector_size);
+        plot_app->emitSignal();
+
+        fftw_free(ptr_double);
     }
     for(uli = 0; uli < 2; uli++) fftw_free(variable_node_inputs[uli]);
     for(uli = 0; uli < 5; uli++) fftw_free(check_node_inputs[uli]);
+    for(uli = 0; uli < v.size(); uli++) fftw_free(v[uli]);
+    fftw_free(x);
 }
 
 }
@@ -103,7 +122,7 @@ int main(int argc, char* argv[]) {
     fftw_complex* channel_dft_input = (fftw_complex *)fftw_malloc(sizeof(fftw_complex)*vector_size);
     std::vector<double> initial_distribution;
     std::vector<double> delta_distribution;
-    double sigma = 0.1;
+    double sigma = 0.5;
     fftw_complex* ptr_input;
     fftw_plan plan;
     double* ptr_double;

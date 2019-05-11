@@ -19,11 +19,13 @@
 #include <vector>
 
 namespace density {
-    double get_llr_pdf(double x, double mean, double sigma) {
+    double get_llr_pdf(double x, double sigma) {
         double rtnv;
         double variance = sigma*sigma;
+        double mean = 2.0*variance;
+        double var = 4.0*variance;
 
-        rtnv = exp(-0.5*(x - mean)*(x - mean)/variance)/sqrt(2.0*M_PI*variance);
+        rtnv = exp(-0.5*(x - mean)*(x - mean)/var)/sqrt(2.0*pi*var);
         return(rtnv);
     }
 
@@ -32,13 +34,12 @@ namespace density {
         double left_pdf_value, right_pdf_value;
         std::vector<double> rtnv(vector_size, 0.0);
         int64_t i;
-        double mean = ((double)half_upper_bound)*delta;
 
         for(i = half_lower_bound; i < upper_bound + 1; i++) {
             left_variable = delta*i - 0.5*delta;
             right_variable = delta*i + 0.5*delta;
-            left_pdf_value = get_llr_pdf(left_variable, mean, sigma);
-            right_pdf_value = get_llr_pdf(right_variable, mean, sigma);
+            left_pdf_value = get_llr_pdf(left_variable, sigma);
+            right_pdf_value = get_llr_pdf(right_variable, sigma);
             rtnv[i + upper_bound] = 0.5*(left_pdf_value + right_pdf_value);
         }
         //for(i = lower_bound; i < half_lower_bound; i++) rtnv[i + upper_bound] = 0.0;
@@ -101,6 +102,9 @@ namespace density {
         b = 0.5*((double)y)*delta;
 
         z = 2.0*atanh(tanh(a)*tanh(b));
+        if(z > delta*half_upper_bound) return(half_upper_bound);
+        if(z < delta*half_lower_bound) return(half_lower_bound);
+        if((z > -0.5*delta) && (z < 0.5*delta)) return(0);
         rtnv = (int64_t)std::round(z/delta);
         return(rtnv);
     }
@@ -136,25 +140,25 @@ namespace density {
             for(j = 0; j < (int64_t)vector_size; j++) ptr_output[i][j] = (double)0.0;
         }
 
-        bound[0][0] = lower_bound;
+        bound[0][0] = half_lower_bound;
         bound[0][1] = 0;
-        bound[0][2] = lower_bound;
+        bound[0][2] = half_lower_bound;
         bound[0][3] = 0; 
 
         bound[1][0] = 0;
-        bound[1][1] = upper_bound;
-        bound[1][2] = lower_bound;
+        bound[1][1] = half_upper_bound;
+        bound[1][2] = half_lower_bound;
         bound[1][3] = 0; 
 
-        bound[2][0] = lower_bound;
+        bound[2][0] = half_lower_bound;
         bound[2][1] = 0;
         bound[2][2] = 0;
-        bound[2][3] = upper_bound; 
+        bound[2][3] = half_upper_bound; 
 
         bound[3][0] = 0;
-        bound[3][1] = upper_bound;
+        bound[3][1] = half_upper_bound;
         bound[3][2] = 0;
-        bound[3][3] = upper_bound; 
+        bound[3][3] = half_upper_bound; 
 
         try {
             std::thread t1(wrapper_update_tanh_map, bound[0], a, b, ptr_output[0], vector_size);
