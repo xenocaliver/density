@@ -22,8 +22,13 @@ namespace density {
     double get_llr_pdf(double x, double mean, double sigma) {
         double rtnv;
         double variance = sigma*sigma;
+<<<<<<< HEAD
+=======
+        double mean = 2.0/variance;
+        double var = 4.0/variance;
+>>>>>>> multithread
 
-        rtnv = exp(-0.5*(x - mean)*(x - mean)/variance)/sqrt(2.0*M_PI*variance);
+        rtnv = exp(-0.5*(x - mean)*(x - mean)/var)/sqrt(2.0*pi*var);
         return(rtnv);
     }
 
@@ -37,12 +42,21 @@ namespace density {
         for(i = half_lower_bound; i < upper_bound + 1; i++) {
             left_variable = delta*i - 0.5*delta;
             right_variable = delta*i + 0.5*delta;
+<<<<<<< HEAD
             left_pdf_value = get_llr_pdf(left_variable, mean, sigma);
             right_pdf_value = get_llr_pdf(right_variable, mean, sigma);
             rtnv[i + upper_bound] = 0.5*(left_pdf_value + right_pdf_value);
         }
         //for(i = lower_bound; i < half_lower_bound; i++) rtnv[i + upper_bound] = 0.0;
         //for(i = half_upper_bound + 1; i < upper_bound; i++) rtnv[i] = 0.0;
+=======
+            left_pdf_value = get_llr_pdf(left_variable, sigma);
+            right_pdf_value = get_llr_pdf(right_variable, sigma);
+            rtnv[i + upper_bound] = 0.5*(left_pdf_value + right_pdf_value);
+        }
+        for(i = lower_bound; i < half_lower_bound; i++) rtnv[i + upper_bound] = 0.0;
+        for(i = half_upper_bound + 1; i < upper_bound; i++) rtnv[i] = 0.0;
+>>>>>>> multithread
         return(rtnv);
     }
 
@@ -67,22 +81,20 @@ namespace density {
         return(sum);
     }
 
-    std::vector<double> clip_pdf(std::vector<double> pdf) {
-        std::vector<double> rtnv(vector_size, 0.0);
+    void clip_pdf(double* pdf) {
         double sum = 0.0;
         int64_t i;
 		for(i = lower_bound + upper_bound; i < upper_bound + half_lower_bound; i++) {
 			sum += pdf[i];
-			rtnv[i] = 0.0;
+			pdf[i] = 0.0;
 		}
-		rtnv[half_lower_bound + upper_bound] +=sum;
+		pdf[half_lower_bound + upper_bound] +=sum;
 		sum = 0.0;
 		for(i = upper_bound + half_upper_bound + 1; i < (int64_t)vector_size; i++) {
 			sum += pdf[i];
-			rtnv[i] = 0.0;
+			pdf[i] = 0.0;
 		}
-		rtnv[half_upper_bound + upper_bound] += sum;
-        return(rtnv);
+		pdf[half_upper_bound + upper_bound] += sum;
 	}
 
     std::vector<double> get_delta_function(void) {
@@ -94,11 +106,6 @@ namespace density {
         return(rtnv);
     }
 
-    double get_absolute_value(double a, double b) {
-        double absv = sqrt(a*a + b*b);
-        return(absv);
-    }
-
     int64_t quasi_gallager(int64_t x, int64_t y, uint64_t vector_size) {
         double a, b;
         double z = 0.0;
@@ -108,55 +115,79 @@ namespace density {
         b = 0.5*((double)y)*delta;
 
         z = 2.0*atanh(tanh(a)*tanh(b));
+        if(z > delta*half_upper_bound) return(half_upper_bound);
+        if(z < delta*half_lower_bound) return(half_lower_bound);
+        if((z > -0.5*delta) && (z < 0.5*delta)) return(0);
         rtnv = (int64_t)std::round(z/delta);
         return(rtnv);
     }
 
-    double* get_two_way_tanh_map(double* a, double* b, uint64_t vector_size) {
-        int64_t i, j, k;
-        double* ptr_output = (double *)fftw_malloc(sizeof(double)*vector_size);
+    void update_tanh_map(int64_t i, int64_t j, double* a, double* b, double* output, uint64_t vector_size) {
+        int64_t k;
 
-        for(i = 0; i < (int64_t)vector_size; i++) {
-            ptr_output[i] = 0.0;
-        }
-
-        for(i = lower_bound; i < upper_bound + 1; i++) {
-            for(j = lower_bound; j < upper_bound + 1; j++) {
-                k = quasi_gallager(i, j, vector_size);
-                ptr_output[k + upper_bound] += a[i + upper_bound]*b[j + upper_bound];
-            }
-        }
-        return(ptr_output);
+        k = quasi_gallager(i, j, vector_size);
+        output[k + upper_bound] += a[i + upper_bound]*b[j + upper_bound];
     }
 
-    double* convolute_pdf(double* a, double* b, uint64_t vector_size) {
-        fftw_complex* fftw_complex_a;
-        fftw_complex* fftw_complex_b;
-        fftw_complex* fftw_complex_c;
-        uint64_t uli;
-        double* rtnv;
-        uint64_t complex_vector_size = 2*(vector_size/2) + 1;
-        fftw_plan plan;
+    void wrapper_update_tanh_map(std::vector<int64_t> bound, double* a, double* b, double* output, uint64_t vector_size) {
+        int64_t i, j;
 
-        fftw_complex_a = (fftw_complex *)fftw_malloc(sizeof(fftw_complex)*vector_size);
-        plan = fftw_plan_dft_r2c_1d(vector_size, a, fftw_complex_a, FFTW_ESTIMATE);
-        fftw_execute(plan);
-        fftw_complex_b = (fftw_complex *)fftw_malloc(sizeof(fftw_complex)*vector_size);
-        plan = fftw_plan_dft_r2c_1d(vector_size, b, fftw_complex_b, FFTW_ESTIMATE);
-        fftw_execute(plan);
-        fftw_complex_c = (fftw_complex *)fftw_malloc(sizeof(fftw_complex)*complex_vector_size);
-        for(uli = 0; uli < complex_vector_size; uli++) {
-            fftw_complex_c[uli][0] = fftw_complex_a[uli][0]*fftw_complex_b[uli][0] - fftw_complex_a[uli][1]*fftw_complex_b[uli][1];
-            fftw_complex_c[uli][1] = fftw_complex_a[uli][1]*fftw_complex_b[uli][0] + fftw_complex_a[uli][0]*fftw_complex_b[uli][1];
+        for(i = bound[0]; i < bound[1] + 1; i++) {
+            for(j = bound[2]; j < bound[3] + 1; j++) {
+                update_tanh_map(i, j, a, b, output, vector_size);
+            }
         }
-        rtnv = (double *)fftw_malloc(sizeof(double)*vector_size);
-        plan = fftw_plan_dft_c2r_1d(complex_vector_size, fftw_complex_c, rtnv, FFTW_ESTIMATE);
-        fftw_execute(plan);
-        for(uli = 0; uli < vector_size; uli++) rtnv[uli] = rtnv[uli]/vector_size;
-        fftw_destroy_plan(plan);
-        fftw_free(fftw_complex_a);
-        fftw_free(fftw_complex_b);
-        fftw_free(fftw_complex_c);
-        return(rtnv);
+    }
+
+    double* get_two_way_tanh_map(double* a, double* b, uint64_t vector_size) {
+        int64_t i, j;
+        std::vector<double*> ptr_output(4, nullptr);
+        std::vector<std::vector<int64_t> > bound(4, std::vector<int64_t>(4, 0));
+
+        for(i = 0; i < 4; i++) {
+            ptr_output[i] = (double *)fftw_malloc(sizeof(double)*vector_size);
+            if(ptr_output[i] == nullptr) {
+                std::cerr << "Can not allocate memory." << std::endl;
+                exit(-1);
+            }
+            for(j = 0; j < (int64_t)vector_size; j++) ptr_output[i][j] = (double)0.0;
+        }
+
+        bound[0][0] = half_lower_bound;
+        bound[0][1] = 0;
+        bound[0][2] = half_lower_bound;
+        bound[0][3] = 0; 
+
+        bound[1][0] = 0;
+        bound[1][1] = half_upper_bound;
+        bound[1][2] = half_lower_bound;
+        bound[1][3] = 0; 
+
+        bound[2][0] = half_lower_bound;
+        bound[2][1] = 0;
+        bound[2][2] = 0;
+        bound[2][3] = half_upper_bound; 
+
+        bound[3][0] = 0;
+        bound[3][1] = half_upper_bound;
+        bound[3][2] = 0;
+        bound[3][3] = half_upper_bound; 
+
+        try {
+            std::thread t1(wrapper_update_tanh_map, bound[0], a, b, ptr_output[0], vector_size);
+            std::thread t2(wrapper_update_tanh_map, bound[1], a, b, ptr_output[1], vector_size);
+            std::thread t3(wrapper_update_tanh_map, bound[2], a, b, ptr_output[2], vector_size);
+            std::thread t4(wrapper_update_tanh_map, bound[3], a, b, ptr_output[3], vector_size);
+            t4.join();
+            t3.join();
+            t2.join();
+            t1.join();
+        } catch(std::exception &e) {
+            std::cerr << e.what() << std::endl;
+            exit(-1);
+        }
+        for(uint64_t uli = 0; uli < vector_size; uli++) ptr_output[0][uli] += ptr_output[1][uli] + ptr_output[2][uli] + ptr_output[3][uli];
+        for(uint64_t uli = 1; uli < 4; uli++) fftw_free(ptr_output[uli]);
+        return(ptr_output[0]);
     }
 }
