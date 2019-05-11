@@ -37,10 +37,8 @@ extern "C" {
 
 namespace density {
 
-extern fftw_complex* update_variable_node(std::vector<fftw_complex*>, fftw_complex*, uint64_t);
+extern double* update_variable_node(std::vector<fftw_complex*>, fftw_complex*, uint64_t);
 extern double* update_check_node(std::vector<double*>, uint64_t);
-extern double* extract_real_part(fftw_complex*, uint64_t);
-extern double* get_absolute_value(fftw_complex*, uint64_t); 
 
 void evolution(std::vector<fftw_complex*> variable_node_inputs, fftw_complex* channel_dft_input, std::vector<double*> check_node_inputs, uint64_t vector_size, Plot* plot_app) {
     uint64_t iteration;
@@ -48,29 +46,20 @@ void evolution(std::vector<fftw_complex*> variable_node_inputs, fftw_complex* ch
     double probability;
     double* x;
     uint64_t uli, ulj;
-    std::vector<fftw_complex*> v(2, nullptr);
-    fftw_complex* ptr_complex;
-    fftw_complex* ptr_result;
+    int64_t i;
 
     x = (double *)fftw_malloc(sizeof(double)*vector_size);
     if(x == nullptr) {
         std::cerr << "Can not allocate memory." << std::endl;
         exit(-1);
     }
-    for(uli = 0; uli < vector_size; uli++) x[uli] = (double)uli;
+    for(i = 0; i < (int64_t)vector_size; i++) x[i] = (double)(i - upper_bound)*delta;
 
     for(iteration = 0; iteration < 40; iteration++) {
     /*variable node calculation */
-        ptr_complex = density::update_variable_node(variable_node_inputs, channel_dft_input, vector_size);
+        ptr_double = density::update_variable_node(variable_node_inputs, channel_dft_input, vector_size);
     
-    /* get joint probability density */
-        v[0] = ptr_complex;
-        v[1] = variable_node_inputs[0];
-        ptr_result = density::update_variable_node(v, channel_dft_input, vector_size);
-
     /* extract real part */
-        ptr_double = density::get_absolute_value(ptr_result, vector_size);
-        fftw_free(ptr_result);
         normalize_pdf(ptr_double, vector_size);
 
     /* update graph */
@@ -80,11 +69,6 @@ void evolution(std::vector<fftw_complex*> variable_node_inputs, fftw_complex* ch
     /* caculating joint probability */
         probability = density::get_error_probability(ptr_double);
         std::cout << std::setw(8) << probability << std::endl;
-        fftw_free(ptr_double);
-
-    /* extract real part */
-        ptr_double = density::get_absolute_value(ptr_complex, vector_size);
-        fftw_free(ptr_complex);
 
     /* copy probability distribution */
         for(uli = 0; uli < 5; uli++) std::memcpy(check_node_inputs[uli], ptr_double, sizeof(double)*vector_size);
@@ -129,13 +113,14 @@ int main(int argc, char* argv[]) {
     Plot* probability_plot = new Plot();
     double* x;
     std::string curve_name;
+    int64_t i;
 
     x = (double *)fftw_malloc(sizeof(double)*vector_size);
     if(x == nullptr) {
         std::cerr << "Can not allocate memory." << std::endl;
         return(EXIT_FAILURE);
     }
-    for(uli = 0; uli < vector_size; uli++) x[uli] = (double)uli;
+    for(i = 0; i < (int64_t)vector_size; i++) x[i] = (double)(i - upper_bound)*delta;
 
     for(uli = 0; uli < 2; uli++) {
         ptr_input = (fftw_complex *)fftw_malloc(sizeof(fftw_complex)*vector_size);
@@ -171,7 +156,7 @@ int main(int argc, char* argv[]) {
     curve_name = R"(delta function)";
     delta_plot->setupCurve(curve_name);
     delta_plot->setAxisScale(0, 0.0, 1.2, 0);
-    delta_plot->setAxisScale(2, 0.0, x[vector_size - 1] + 1.0, 0);
+    delta_plot->setAxisScale(2, x[0], x[vector_size - 1], 0);
     delta_plot->updateAxes();
     delta_plot->plotCurve(x, delta_distribution.data(), vector_size);
     delta_plot->show();
@@ -181,7 +166,7 @@ int main(int argc, char* argv[]) {
     awgn_plot->setTitle("AWGN noise distribution");
     curve_name = R"(AWGN)";
     awgn_plot->setupCurve(curve_name);
-    awgn_plot->setAxisScale(2, 0.0, x[vector_size - 1] + 1.0, 0);
+    awgn_plot->setAxisScale(2, x[0], x[vector_size - 1], 0);
     awgn_plot->updateAxes();
     awgn_plot->plotCurve(x, initial_distribution.data(), vector_size);
     awgn_plot->show();
@@ -191,7 +176,7 @@ int main(int argc, char* argv[]) {
     probability_plot->setTitle("probability density function");
     curve_name = R"(probability function)";
     probability_plot->setupCurve(curve_name);
-    probability_plot->setAxisScale(2, 0.0, x[vector_size - 1] + 1.0, 0);
+    probability_plot->setAxisScale(2, x[0], x[vector_size - 1], 0);
     probability_plot->updateAxes();
     QObject::connect(probability_plot, SIGNAL(emitSignal()), probability_plot, SLOT(replot()));
     probability_plot->show();

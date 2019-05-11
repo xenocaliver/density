@@ -24,11 +24,14 @@ extern "C" {
 #include <fftw3.h>
 }
 
+#include "common.hpp"
 #include "transform_complex.hpp"
 
-namespace density {
 
-fftw_complex* update_variable_node(std::vector<fftw_complex*> input, fftw_complex* channel_input, uint64_t vector_size) {
+namespace density {
+extern void clip_pdf(double*);
+
+double* update_variable_node(std::vector<fftw_complex*> input, fftw_complex* channel_input, uint64_t vector_size) {
     uint64_t degree = input.size();
     fftw_complex* ptr_conv_result;
     fftw_complex* ptr_inverse_transform_result;
@@ -38,6 +41,7 @@ fftw_complex* update_variable_node(std::vector<fftw_complex*> input, fftw_comple
     std::vector<std::vector<std::complex<double> > > complex_input(degree, std::vector<std::complex<double> >(vector_size, (std::complex<double>)0.0));
     std::vector<std::complex<double> > conv_result(vector_size, (std::complex<double>)0.0);
     std::vector<std::complex<double> > complex_channel_input(vector_size, (std::complex<double>)0.0);
+    double* ptr_double;
 
 /* prepare data area including input data */
     for(uli = 0; uli < degree; uli++) ptr_fftw_out[uli] = (fftw_complex *)fftw_malloc(sizeof(fftw_complex)*vector_size);
@@ -94,48 +98,24 @@ fftw_complex* update_variable_node(std::vector<fftw_complex*> input, fftw_comple
 
     for(ulj = 0; ulj < vector_size; ulj++) {
         ptr_inverse_transform_result[ulj][0] = ptr_inverse_transform_result[ulj][0]/(double)vector_size;
-        ptr_inverse_transform_result[ulj][1] = ptr_inverse_transform_result[ulj][1]/(double)vector_size;
     }
+
+    ptr_double = (double *)fftw_malloc(sizeof(double)*vector_size);
+    if(ptr_double == nullptr) {
+        std::cerr << "Can not allocate memory." << std::endl;
+        exit(-1);
+    }
+    for(ulj = 0; ulj < vector_size; ulj++) ptr_double[ulj] = ptr_inverse_transform_result[((vector_size - 1)/2 + ulj)%vector_size][0]*delta;
+    clip_pdf(ptr_double);
 
 /* free memory */
     for(uli = 0; uli < degree; uli++) {
         fftw_free(ptr_fftw_out[uli]);
     }
     fftw_free(ptr_conv_result);
-
-    return(ptr_inverse_transform_result);
-}
-
-double* extract_real_part(fftw_complex* input, uint64_t vector_size) {
-    uint64_t uli;
-    double* ptr_double;
-
-    ptr_double = (double *)fftw_malloc(sizeof(double)*vector_size);
-    if(ptr_double == nullptr) {
-        std::cerr << "Can not allocate memory." << std::endl;
-        exit(-1);
-    }
-    for(uli = 0; uli < vector_size; uli++) ptr_double[uli] = input[uli][0];
+    fftw_free(ptr_inverse_transform_result);
 
     return(ptr_double);
-
 }
 
-double* get_absolute_value(fftw_complex* input, uint64_t vector_size) {
-    uint64_t uli;
-    double* ptr_double;
-    double x;
-
-    ptr_double = (double *)fftw_malloc(sizeof(double)*vector_size);
-    if(ptr_double == nullptr) {
-        std::cerr << "Can not allocate memory." << std::endl;
-        exit(-1);
-    }
-
-    for(uli = 0; uli < vector_size; uli++) {
-        x = input[uli][0]*input[uli][0] + input[uli][1]*input[uli][1];
-        ptr_double[uli] = std::sqrt(x);
-    }
-    return(ptr_double);
-}
 }

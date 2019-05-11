@@ -67,22 +67,20 @@ namespace density {
         return(sum);
     }
 
-    std::vector<double> clip_pdf(std::vector<double> pdf) {
-        std::vector<double> rtnv(vector_size, 0.0);
+    void clip_pdf(double* pdf) {
         double sum = 0.0;
         int64_t i;
 		for(i = lower_bound + upper_bound; i < upper_bound + half_lower_bound; i++) {
 			sum += pdf[i];
-			rtnv[i] = 0.0;
+			pdf[i] = 0.0;
 		}
-		rtnv[half_lower_bound + upper_bound] +=sum;
+		pdf[half_lower_bound + upper_bound] +=sum;
 		sum = 0.0;
 		for(i = upper_bound + half_upper_bound + 1; i < (int64_t)vector_size; i++) {
 			sum += pdf[i];
-			rtnv[i] = 0.0;
+			pdf[i] = 0.0;
 		}
-		rtnv[half_upper_bound + upper_bound] += sum;
-        return(rtnv);
+		pdf[half_upper_bound + upper_bound] += sum;
 	}
 
     std::vector<double> get_delta_function(void) {
