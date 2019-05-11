@@ -46,14 +46,8 @@ void evolution(std::vector<fftw_complex*> variable_node_inputs, fftw_complex* ch
     double probability;
     double* x;
     uint64_t uli, ulj;
-<<<<<<< HEAD
-    std::vector<fftw_complex*> v(2, nullptr);
-    fftw_complex* ptr_complex;
-    fftw_complex* ptr_result;
-=======
     int64_t i;
     std::vector<fftw_complex*> v(variable_node_inputs.size() + 1, nullptr);
->>>>>>> multithread
 
     x = (double *)fftw_malloc(sizeof(double)*vector_size);
     if(x == nullptr) {
@@ -62,9 +56,6 @@ void evolution(std::vector<fftw_complex*> variable_node_inputs, fftw_complex* ch
     }
     for(i = 0; i < (int64_t)vector_size; i++) x[i] = (double)(i - upper_bound)*delta;
 
-<<<<<<< HEAD
-    for(iteration = 0; iteration < 10; iteration++) {
-=======
     for(uli = 0; uli < v.size(); uli++) {
         v[uli] = (fftw_complex *)fftw_malloc(sizeof(fftw_complex)*vector_size);
         if(v[uli] == nullptr) {
@@ -74,18 +65,9 @@ void evolution(std::vector<fftw_complex*> variable_node_inputs, fftw_complex* ch
     }
 
     for(iteration = 0; iteration < 1000; iteration++) {
->>>>>>> multithread
     /*variable node calculation */
         ptr_double = density::update_variable_node(variable_node_inputs, channel_dft_input, vector_size);
     
-<<<<<<< HEAD
-    /* get joint probability density */
-        v[0] = variable_node_inputs[0];
-        v[1] = ptr_complex;
-        ptr_result = density::update_variable_node(v, channel_dft_input, vector_size);
-
-=======
->>>>>>> multithread
     /* extract real part */
         normalize_pdf(ptr_double, vector_size);
 
@@ -140,7 +122,7 @@ int main(int argc, char* argv[]) {
     fftw_complex* channel_dft_input = (fftw_complex *)fftw_malloc(sizeof(fftw_complex)*vector_size);
     std::vector<double> initial_distribution;
     std::vector<double> delta_distribution;
-    double sigma = 0.16;
+    double sigma = 0.15;
     fftw_complex* ptr_input;
     fftw_plan plan;
     double* ptr_double;
