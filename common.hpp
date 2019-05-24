@@ -26,3 +26,6 @@ constexpr int64_t half_lower_bound = -(int64_t)(vector_size - 1)/4;
 constexpr double delta = 0.05;
 constexpr double error_probability_threshold = 1.0e-6;
 constexpr double pi = 3.14159265358979323846264338327950288;
+
+using distribution_pair = std::pair<uint64_t, double>;
+using degree_distribution = std::pair<std::vector<distribution_pair>, std::vector<distribution_pair> >;

@@ -1,0 +1,23 @@
+{
+    "degree_distribution":
+    {
+        "lambda":
+        [
+                {"degree": 1, "weight": 0.169010},
+                {"degree": 2, "weight": 0.161244},
+                {"degree": 4, "weight": 0.005938},
+                {"degree": 5, "weight": 0.016799},
+                {"degree": 6, "weight": 0.186455},
+                {"degree": 13, "weight": 0.006864},
+                {"degree": 16, "weight": 0.025890},
+                {"degree": 18, "weight": 0.096393},
+                {"degree": 26, "weight": 0.010531},
+                {"degree": 27, "weight": 0.004678},
+                {"degree": 28, "weight": 0.079616},
+                {"degree": 38, "weight": 0.011885},
+                {"degree": 99, "weight": 0.224691}
+        ],
+        "rho":
+            [{"degree": 10, "weight": 1}]
+    }
+}
