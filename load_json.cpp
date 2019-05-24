@@ -85,27 +85,3 @@ degree_distribution load_degree_distribution(std::string file_name){
     rtnv = std::make_pair(lambda, rho);
     return(rtnv);
 }
-
-int main(int argc, char* argv[]) {
-    std::vector<distribution_pair> pairv;
-    std::vector<distribution_pair>::iterator vit;
-    degree_distribution dist;
-
-    if(argc != 2) {
-        std::cerr << "Usage ./load_json <json file name>" << std::endl;
-        return(EXIT_FAILURE);
-    }
-    dist = load_degree_distribution(std::string(argv[1]));
-
-    // print lambda
-    pairv = dist.first;
-    for(vit = pairv.begin(); vit != pairv.end(); ++vit) {
-        std::cout << "degree = " << vit->first << "\tweght = " << vit->second << std::endl;
-    }
-    // print rho
-    pairv = dist.second;
-    for(vit = pairv.begin(); vit != pairv.end(); ++vit) {
-        std::cout << "degree = " << vit->first << "\tweght = " << vit->second << std::endl;
-    }
-    return(EXIT_SUCCESS);
-}

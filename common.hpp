@@ -18,7 +18,7 @@
 #include <cstdlib>
 #include <cstdint>
 
-constexpr uint64_t vector_size = (1 << 11) - 1;
+constexpr uint64_t vector_size = (1 << 12) - 1;
 constexpr int64_t upper_bound = (vector_size - 1)/2;
 constexpr int64_t lower_bound = -(int64_t)(vector_size - 1)/2;
 constexpr int64_t half_upper_bound = (vector_size - 1)/4;

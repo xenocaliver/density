@@ -1,0 +1,9 @@
+{
+    "degree_distribution":
+    {
+        "lambda":
+            [{"degree": 2, "weight": 1.0}],
+        "rho":
+            [{"degree": 5, "weight": 1.0}]
+    }
+}

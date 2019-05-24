@@ -40,6 +40,8 @@ fftw_plan p1,p2,p3;
 fftw_complex *_a, *_b, *_c, *_A, *_B, *_C;
 double *tmp1, *tmp2, *tmp3, *tmp4;
 std::vector<std::vector<int> > R_tbl(vector_size, std::vector<int>(vector_size, 0));
+extern degree_distribution load_degree_distribution(std::string);
+
 namespace density {
 
 void clip_pdf(double* x) /* PDF clipping function */
@@ -181,7 +183,7 @@ double R(double a, double b)
   return 2.0 * atanh(tanh(0.5*a)*tanh(0.5*b));
 }
 
-void init() /* initialization */
+void init(void) /* initialization */
 {
   int i,j;
   int idx = 0;
@@ -243,14 +245,26 @@ void Rpower(double* a, double* b, int n)
   for (i = 1; i < n; i++) apply_R(a,b,b);
 }
 
-void evolution(uint64_t vector_size, uint64_t variable_node_degree, uint64_t check_node_degree, double channel_var, Plot* plot_app) {
+void add_pdf(double* a, double* b, double weight, uint64_t vector_size) {
+  uint64_t uli;
+
+  for(uli = 0; uli < vector_size; uli++) a[uli] += weight*b[uli];
+}
+
+void clear_pdf(double* pdf, uint64_t vector_size) {
+  for(uint64_t uli = 0; uli < vector_size; uli++) pdf[uli] = (double)0.0;
+}
+
+void evolution(uint64_t vector_size, degree_distribution degdist, double channel_var, Plot* plot_app) {
     double* x;
     double probability, probability_old;
     double *P_lambda, *P_c2m, *P_m2c, *f0, *f1;
     double *tmpA;
     double *tmpB;
+    double *tmpC;
     uint64_t iteration;
     int64_t i;
+    uint64_t uli;
 
     x = (double *)fftw_malloc(sizeof(double)*vector_size);
     if(x == nullptr) {
@@ -268,6 +282,7 @@ void evolution(uint64_t vector_size, uint64_t variable_node_degree, uint64_t che
     f1= (double *)fftw_malloc(sizeof(double)*vector_size);
     tmpA = (double *)fftw_malloc(sizeof(double)*vector_size);
     tmpB = (double *)fftw_malloc(sizeof(double)*vector_size);
+    tmpC = (double *)fftw_malloc(sizeof(double)*vector_size);
 
 	/* initialization of LLR density */
     quantize_pdf(P_lambda, channel_var);
@@ -280,24 +295,36 @@ void evolution(uint64_t vector_size, uint64_t variable_node_degree, uint64_t che
 
     for(iteration = 0; iteration < 1000; iteration++) {
 	    /* variable node operation */
-        convpower(P_c2m, tmpA, variable_node_degree - 1);
-        conv(P_lambda, tmpA, P_m2c);
-        normalize_pdf(P_m2c);
+      clear_pdf(P_m2c, vector_size);
+      clear_pdf(tmpC, vector_size);
+      for(uli = 0; uli < degdist.first.size(); uli++) {
+        clear_pdf(tmpA, vector_size);
+        convpower(P_c2m, tmpA, degdist.first[uli].first);
+        add_pdf(tmpC, tmpA, degdist.first[uli].second, vector_size);
+      }
+      conv(P_lambda, tmpC, P_m2c);
+      normalize_pdf(P_m2c);
 
-        /* update graph */
-        plot_app->updateCurve(x, P_m2c, vector_size);
-        plot_app->emitSignal();
+      /* update graph */
+      plot_app->updateCurve(x, P_m2c, vector_size);
+      plot_app->emitSignal();
         
 		/* BER computation */
-        probability = error_prob(P_m2c);
-        std::printf("# %" PRIu64 " %16.12f\n", iteration, probability);
+      probability = error_prob(P_m2c);
+      std::printf("# %" PRIu64 " %16.12f\n", iteration, probability);
 
-        if (fabs(probability-probability_old) < 1e-5) break; /* break condition */
+      if(fabs(probability-probability_old) < 1e-5) break; /* break condition */
 
-        probability_old = probability;
+      probability_old = probability;
+      clear_pdf(P_c2m, vector_size);
 		/* check node operation */ 
-        Rpower(P_m2c, P_c2m, check_node_degree - 1);
-        normalize_pdf(P_c2m);
+      for(uli = 0; uli < degdist.second.size(); uli++) {
+        Rpower(P_m2c, tmpC, degdist.second[uli].first);
+        normalize_pdf(tmpC);
+        add_pdf(P_c2m, tmpC, degdist.second[uli].second, vector_size);
+        clear_pdf(tmpC, vector_size);
+      }
+      normalize_pdf(P_c2m);
     }
     fftw_free(x);
     fftw_free(P_lambda);
@@ -307,6 +334,7 @@ void evolution(uint64_t vector_size, uint64_t variable_node_degree, uint64_t che
     fftw_free(f1);
     fftw_free(tmpA);
     fftw_free(tmpB);
+    fftw_free(tmpC);
     fftw_free(_a);
     fftw_free(_b);
     fftw_free(_c);
@@ -327,16 +355,15 @@ int main(int argc, char* argv[]) {
     double* x;
     std::string curve_name;
     int64_t i;
-    uint64_t variable_node_degree, check_node_degree;
     double sigma;
+    degree_distribution degdist;
 
-    if(argc != 4) {
-        std::cerr << "Usage: ./density <variable node degree> <check node degree> <sigma>" << std::endl;
+    if(argc != 3) {
+        std::cerr << "Usage: ./density <degree distribution file name> <sigma>" << std::endl;
         return(EXIT_FAILURE);
     }
-    variable_node_degree = std::strtoul(argv[1], nullptr, 10);
-    check_node_degree = std::strtoul(argv[2], nullptr, 10);
-    sigma = std::stod(argv[3]);
+    sigma = std::stod(argv[2]);
+    degdist = load_degree_distribution(std::string(argv[1]));
 
     x = (double *)fftw_malloc(sizeof(double)*vector_size);
     if(x == nullptr) {
@@ -355,7 +382,7 @@ int main(int argc, char* argv[]) {
     QObject::connect(probability_plot, SIGNAL(emitSignal()), probability_plot, SLOT(replot()));
     probability_plot->show();
 
-     std::thread evo_thread(density::evolution, vector_size, variable_node_degree, check_node_degree, sigma*sigma, probability_plot);
+     std::thread evo_thread(density::evolution, vector_size, degdist, sigma*sigma, probability_plot);
      evo_thread.detach();
 
     return(app.exec());
