@@ -320,7 +320,6 @@ void evolution(uint64_t vector_size, degree_distribution degdist, double channel
 		/* check node operation */ 
       for(uli = 0; uli < degdist.second.size(); uli++) {
         Rpower(P_m2c, tmpC, degdist.second[uli].first);
-        normalize_pdf(tmpC);
         add_pdf(P_c2m, tmpC, degdist.second[uli].second, vector_size);
         clear_pdf(tmpC, vector_size);
       }
