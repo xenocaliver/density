@@ -255,7 +255,7 @@ void clear_pdf(double* pdf, uint64_t vector_size) {
   for(uint64_t uli = 0; uli < vector_size; uli++) pdf[uli] = (double)0.0;
 }
 
-void evolution(uint64_t vector_size, degree_distribution degdist, double channel_var, Plot* plot_app) {
+double evolution(uint64_t vector_size, degree_distribution degdist, double channel_var) {
     double* x;
     double probability, probability_old;
     double *P_lambda, *P_c2m, *P_m2c, *f0, *f1;
@@ -305,15 +305,11 @@ void evolution(uint64_t vector_size, degree_distribution degdist, double channel
       conv(P_lambda, tmpC, P_m2c);
       normalize_pdf(P_m2c);
 
-      /* update graph */
-      plot_app->updateCurve(x, P_m2c, vector_size);
-      plot_app->emitSignal();
-        
 		/* BER computation */
       probability = error_prob(P_m2c);
       std::printf("# %" PRIu64 " %16.12f\n", iteration, probability);
 
-      if(fabs(probability-probability_old) < 1e-5) break; /* break condition */
+      if(fabs(probability-probability_old) < break_threshold) break; /* break condition */
 
       probability_old = probability;
       clear_pdf(P_c2m, vector_size);
@@ -344,6 +340,7 @@ void evolution(uint64_t vector_size, degree_distribution degdist, double channel
     fftw_free(tmp2);
     fftw_free(tmp3);
     fftw_free(tmp4);
+    return(probability);
 }
 
 }
@@ -351,38 +348,49 @@ void evolution(uint64_t vector_size, degree_distribution degdist, double channel
 int main(int argc, char* argv[]) {
     QApplication app(argc, argv);
     Plot* probability_plot = new Plot();
-    double* x;
     std::string curve_name;
-    int64_t i;
+    double max_sigma, min_sigma;
     double sigma;
+    double delta_sigma = 0.01;
+    std::vector<double> bit_error_rate;
+    double pb;
     degree_distribution degdist;
+    double* x;
 
-    if(argc != 3) {
-        std::cerr << "Usage: ./density <degree distribution file name> <sigma>" << std::endl;
+    if(argc != 4) {
+        std::cerr << "Usage: ./biterror <degree distribution file name> <min sigma> <max sigma>" << std::endl;
         return(EXIT_FAILURE);
     }
-    sigma = std::stod(argv[2]);
+    min_sigma = std::stod(argv[2]);
+    max_sigma = std::stod(argv[3]);
     degdist = load_degree_distribution(std::string(argv[1]));
 
-    x = (double *)fftw_malloc(sizeof(double)*vector_size);
+    x = (double *)fftw_malloc(sizeof(double)*std::floor(max_sigma/delta_sigma));
     if(x == nullptr) {
-        std::cerr << "Can not allocate memory." << std::endl;
-        return(EXIT_FAILURE);
+      std::cerr << "Can not allocate memory." << std::endl;
+      return(EXIT_FAILURE);
     }
-    for(i = 0; i < (int64_t)vector_size; i++) x[i] = (double)(i - upper_bound)*delta;
+    sigma = min_sigma;
+    for(uint64_t uli = 0; uli < std::floor(max_sigma/delta_sigma); uli++) x[uli] = sigma + delta_sigma*(double)uli;
 
     // draw probability density function 
     probability_plot->resize(800, 600);
-    probability_plot->setTitle("probability density function");
-    curve_name = R"(probability function)";
+    probability_plot->setTitle("bit error rate");
+    curve_name = R"(bit error rate)";
     probability_plot->setupCurve(curve_name);
-    probability_plot->setAxisScale(2, x[0], x[vector_size - 1], 0);
+    probability_plot->setAxisScale(2, min_sigma, max_sigma + delta_sigma, 0);
     probability_plot->updateAxes();
     QObject::connect(probability_plot, SIGNAL(emitSignal()), probability_plot, SLOT(replot()));
     probability_plot->show();
-
-     std::thread evo_thread(density::evolution, vector_size, degdist, sigma*sigma, probability_plot);
-     evo_thread.detach();
+    
+    while(sigma < max_sigma) {
+      pb = density::evolution(vector_size, degdist, sigma*sigma);
+      if(pb < break_threshold) pb = 0.0;
+      bit_error_rate.push_back(pb);
+      sigma += delta_sigma;
+    }
+    probability_plot->updateCurve(x, bit_error_rate.data(), bit_error_rate.size());
+    probability_plot->emitSignal();
 
     return(app.exec());
 }
