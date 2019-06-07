@@ -188,6 +188,7 @@ void init(void) /* initialization */
   int i,j;
   int idx = 0;
   double a,b,v;
+  uint64_t uli;
 
   printf("#vector_size      = %" PRIu64 "\n", vector_size);
   printf("#lower_bound      = %" PRId64 "\n", lower_bound);
@@ -223,6 +224,24 @@ void init(void) /* initialization */
   p1 = fftw_plan_dft_1d(vector_size, _a, _A, FFTW_FORWARD, FFTW_ESTIMATE);  
   p2 = fftw_plan_dft_1d(vector_size, _b, _B, FFTW_FORWARD, FFTW_ESTIMATE);  
   p3 = fftw_plan_dft_1d(vector_size, _C, _c, FFTW_BACKWARD, FFTW_ESTIMATE);  
+  for(uli = 0; uli < vector_size; uli++) {
+    _a[uli][0] = 0.0;
+    _a[uli][1] = 0.0;
+    _b[uli][0] = 0.0;
+    _b[uli][1] = 0.0;
+    _c[uli][0] = 0.0;
+    _c[uli][1] = 0.0;
+    _A[uli][0] = 0.0;
+    _A[uli][1] = 0.0;
+    _B[uli][0] = 0.0;
+    _B[uli][1] = 0.0;
+    _C[uli][0] = 0.0;
+    _C[uli][1] = 0.0;
+    tmp1[uli] = 0.0;
+    tmp2[uli] = 0.0;
+    tmp3[uli] = 0.0;
+    tmp4[uli] = 0.0;
+  }
 }
 
 void apply_R(double* a, double* b, double* c)
@@ -283,6 +302,14 @@ void evolution(uint64_t vector_size, degree_distribution degdist, double channel
     tmpA = (double *)fftw_malloc(sizeof(double)*vector_size);
     tmpB = (double *)fftw_malloc(sizeof(double)*vector_size);
     tmpC = (double *)fftw_malloc(sizeof(double)*vector_size);
+    clear_pdf(P_lambda, vector_size);
+    clear_pdf(P_c2m, vector_size);
+    clear_pdf(P_m2c, vector_size);
+    clear_pdf(f0, vector_size);
+    clear_pdf(f1, vector_size);
+    clear_pdf(tmpA, vector_size);
+    clear_pdf(tmpB, vector_size);
+    clear_pdf(tmpC, vector_size);
 
 	/* initialization of LLR density */
     quantize_pdf(P_lambda, channel_var);
