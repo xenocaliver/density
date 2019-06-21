@@ -379,7 +379,7 @@ int main(int argc, char* argv[]) {
     std::string curve_name;
     double max_sigma, min_sigma;
     double sigma;
-    double delta_sigma = 0.01;
+    double delta_sigma = 0.001;
     std::vector<double> bit_error_rate;
     double pb;
     degree_distribution degdist;

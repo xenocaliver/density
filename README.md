@@ -5,6 +5,7 @@ Install following tools.
 - gcc, g++
 - make
 - cmake
+- boost
 - Qt5
 - qwt
 - fftw
