@@ -2,7 +2,7 @@
 #define PLOT_H
 
 #include <string>
-#include <qwt_plot.h>
+#include <QwtPlot>
 
 class QwtPlotCurve;
 

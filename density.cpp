@@ -320,6 +320,8 @@ void evolution(uint64_t vector_size, degree_distribution degdist, double channel
 
     probability_old = 1.0;
 
+    std::cout << std::endl;
+    std::cout << "### Error Probability" << std::endl;
     for(iteration = 0; iteration < 1000; iteration++) {
 	    /* variable node operation */
       clear_pdf(P_m2c, vector_size);
