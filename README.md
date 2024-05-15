@@ -8,7 +8,7 @@ Install following tools.
 - boost
 - [Qt6](https://www.qt.io/product/qt6)
 - [qwt](https://qwt.sourceforge.io/index.html)
-- [fftwi3](http://fftw.org)
+- [fftwt3](http://fftw.org)
 
 gcc, g++, make, cmake, boost, Qt6, and qwt are installed by package management system.
 
