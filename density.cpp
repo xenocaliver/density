@@ -108,28 +108,46 @@ void normalize_pdf(double* r)
   sum = 0.0;			/* normalization */
 
   for (i = 0; i < (int64_t)vector_size; i++) sum += r[i]*delta;
-  for (i = 0; i < (int64_t)vector_size; i++) r[i]/= sum;
+  for (i = 0; i < (int64_t)vector_size; i++) r[i] /= sum;
 }
 
 void conv(double* a, double* b, double* r) /* convolution of two PDFs */
 {
   int i;
 
+// _a[i][0] : real part in time domain
+// _a[i][1] : imaginary part in time domain
+// _b[i][0] : real part in time domain
+// _b[i][1] : imaginary part in time domain
+ 
   for (i = 0; i < (int64_t)vector_size; i++) {
     _a[i][0] = a[i];
     _a[i][1] = 0.0;
     _b[i][0] = b[i];
     _b[i][1] = 0.0;
   }
-  fftw_execute(p1);
-  fftw_execute(p2);
+  fftw_execute(p1);         // fourier transform for _a
+  fftw_execute(p2);         // fourier transform for _b
+// _A[i][0] : real part in frequency domain
+// _A[i][1] : imaginary part in frequency domain
+// _B[i][0] : real part in frequency domain
+// _B[i][1] : imaginary part in frequency domain
+// _C[i][0] : real part in frequency domain
+// _C[i][1] : imaginary part in frequency domain
+
+// for convolution
+// _C = (_A[0] + i_A[1])*(_B[0] + i_B[1])
+// _C = _A[0]*_B[0] - _A[1]*_B[1] + i(_A[0]*_B[1] + _A[1]*_B[0])
+// Therefore,
+// _C[i][0] = _A[i][0]*_B[i][0] - _A[i][1]*_B[i][1]  (real part)
+// _C[i][1] = _A[i][0]*_B[i][1] + _A[i][1]*_B[i][0]  (imaginary part)
   for (i = 0; i < (int64_t)vector_size; i++) {
     _C[i][0] = _A[i][0]*_B[i][0]-_A[i][1]*_B[i][1];
     _C[i][1] = _A[i][0]*_B[i][1]+_A[i][1]*_B[i][0];
   }
-  fftw_execute(p3);
+  fftw_execute(p3);              // fourier inverse transform (_C to _c)
   for (i = 0; i < (int64_t)vector_size; i++) {
-    r[i] = _c[((vector_size - 1)/2 + i)%vector_size][0]*delta/(double)vector_size;
+    r[i] = _c[((vector_size - 1)/2 + i)%vector_size][0]*delta/(double)vector_size;   // pickup real part of _c
   }
   clip_pdf(r);
 }
@@ -207,7 +225,7 @@ void init(void) /* initialization */
   tmp2 = (double *)fftw_malloc(sizeof(double)*vector_size);
   tmp3 = (double *)fftw_malloc(sizeof(double)*vector_size);
   tmp4 = (double *)fftw_malloc(sizeof(double)*vector_size);
-	
+
   for (i = half_lower_bound; i <= half_upper_bound; i++) {
     for (j = half_lower_bound; j <= half_upper_bound; j++) {
       a = delta*i;
@@ -302,6 +320,7 @@ void evolution(uint64_t vector_size, degree_distribution degdist, double channel
     tmpA = (double *)fftw_malloc(sizeof(double)*vector_size);
     tmpB = (double *)fftw_malloc(sizeof(double)*vector_size);
     tmpC = (double *)fftw_malloc(sizeof(double)*vector_size);
+
     clear_pdf(P_lambda, vector_size);
     clear_pdf(P_c2m, vector_size);
     clear_pdf(P_m2c, vector_size);

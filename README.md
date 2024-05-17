@@ -19,7 +19,7 @@ Clone demo program's repository.
 git clone https://github.com/xenocaliver/density.git
 ```
 ## Build the demo program
-Before building the demo program, you modify CMakeLists.txt file for your system. This CMakeLists.txt is writen for mac OS and homebrew.
+Before building the demo program, you modify CMakeLists.txt file for your system. This CMakeLists.txt is written for mac OS and homebrew.
 
 ```sh
 cd density

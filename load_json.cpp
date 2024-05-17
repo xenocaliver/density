@@ -18,6 +18,7 @@
 #include <iostream>
 #include <cstdlib>
 #include <fstream>
+#include <filesystem>
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/json_parser.hpp>
 #include <boost/foreach.hpp>
@@ -34,6 +35,12 @@ degree_distribution load_degree_distribution(std::string file_name){
     distribution_pair dpair;
     degree_distribution rtnv;
 
+    // check if json file exists
+    std::filesystem::path path = file_name;
+    if(!std::filesystem::exists(path)) {
+        std::cerr << "File not found: " << file_name << std::endl;
+        exit(-1);
+    }
     read_json(file_name, pt);
 
     // extract variable node degree distribution
