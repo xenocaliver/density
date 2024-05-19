@@ -84,7 +84,7 @@ $$
 In order to execute above calculation, let $c=\mathcal{R}(a,b)$ and $\mathcal{R}$ calculation in quantized form:
 
 $$
-p_{c}[k] = \sum_{(i,j):k\mathit{\Delta}=\mathcal{R}(i\mathit{\Delta},j\mathit{\Delta})}.
+p_{c}[k] = \sum_{(i,j):k\mathit{\Delta}=\mathcal{R}(i\mathit{\Delta},j\mathit{\Delta})}p_{a}[i]p_{b}[j].
 $$
 
 We construct lookup table for $(i,j)$ satisfies $k\mathit{\Delta}=\mathcal{R}(i\mathit{\Delta},j\mathit{\Delta})$ before evolution calculation.
