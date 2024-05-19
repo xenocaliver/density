@@ -198,7 +198,7 @@ void convpower(double* a, double* b, int n)
 
 double R(double a, double b)
 {
-  return 2.0 * atanh(tanh(0.5*a)*tanh(0.5*b));
+  return 2.0*atanh(tanh(0.5*a)*tanh(0.5*b));
 }
 
 void init(void) /* initialization */
