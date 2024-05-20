@@ -1,5 +1,4 @@
 theme: jekyll-theme-cayman
 layout: default
-use_math: true
-kramdown:
-  syntax_highlighter: rouge
+markdown: kramdown
+usemathjax: true
