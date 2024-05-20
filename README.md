@@ -41,13 +41,17 @@ I implemented [Chung](https://ieeexplore.ieee.org/document/905935)'s denisty evo
 I added GUI plotting pdf(probability density function) convergence process and adopted to irregular LDPC codes. 
 
 Let $v$ be a log-likelihood ratio (LLR) message from a degree-$d_{v}$ variable node to a check node. Due to BP(Belief Propagation) decoding method, $v$ equals to the sum of all incoming LLRs; i.e.
+
 $$
 v=\sum_{i=0}^{d_{v}-1}u_{i}.
 $$
+
 And check node update rule is shown as follows:
+
 $$
 u = 2\tanh^{-1}\left[\prod_{j=1}^{d_{c}-1}\tanh\frac{v_{j}}{2}\right]
 $$
+
 where $v_{j}, j=1,\ldots,d_{c}-1$.
 
 Let $\mathit{\Delta}$ be a quantization width of random variables. And we define quantize operator $\mathcal{Q}$ as follows:
@@ -59,14 +63,19 @@ $$
 \left\lceil\frac{w}{\mathit{\Delta}}-\frac{1}{2}\right\rfloor\mathit{\Delta}, \left(w\leqq-\frac{\mathit{\Delta}}{2}\right).
 \end{cases}
 $$
+
 And let $\bar{w}$ be a quantized message of $w$ i.e. $\bar{w}=\mathcal{Q}(w)$. We denote the probability mass function(pmf) of a quantized message $\bar{w}$ by $p_{w}[k]=\mathrm{Pr}(\bar{w}=k\mathit{\Delta})$ for $k\in\mathbb{Z}$. Then, let $p_{v}$ be a pmf corresponding message $v$ and $p_{v}$ is given by
+
 $$
 p_{v}=\bigotimes_{i=0}^{d_{v}-1}p_{u_{i}}
 $$
+
 where $\bigotimes$ represents convolution calculation. In general, computing complexity for convolution is very large. However, we used (complex) Fourier transform $\mathscr{F}$. Let $\mathscr{F}[w]$ be a (complex) Fourier transformed function. Therefore, we apply Fourier transform both side of above fomula and we have
+
 $$
 \mathscr{F}[p_{v}]=\mathscr{F}\left[\bigotimes_{i=0}^{d_{v}-1}p_{u_{i}}\right]=\prod_{i=0}^{d_{v}-1}\mathscr{F}[p_{u_{i}}].
 $$
+
 So, we apply (complex) Fourier transform once, and calculate simple product of transformed functions and revert the result via inverse Fourier transform $\mathscr{F}^{-1}$. Thus, we can calculate variable node update of pdf.
 
 However, check node update calculation is more complicated. Before we formulate update rule for check node update, we define
