@@ -59,8 +59,8 @@ Let $\mathit{\Delta}$ be a quantization width of random variables. And we define
 $$
 \mathcal{Q}(w)=
 \begin{cases}
-\left\lfloor\frac{w}{\mathit{\Delta}}+\frac{1}{2}\right\rfloor\mathit{\Delta}, \left(w\geqq\frac{\mathit{\Delta}}{2}\right)\\
-\left\lceil\frac{w}{\mathit{\Delta}}-\frac{1}{2}\right\rfloor\mathit{\Delta}, \left(w\leqq-\frac{\mathit{\Delta}}{2}\right).
+\left\lfloor\frac{w}{\mathit{\Delta}}+\frac{1}{2}\right\rfloor\mathit{\Delta}& \left(w\geqq\frac{\mathit{\Delta}}{2}\right)\\
+\left\lceil\frac{w}{\mathit{\Delta}}-\frac{1}{2}\right\rfloor\mathit{\Delta}& \left(w\leqq-\frac{\mathit{\Delta}}{2}\right).
 \end{cases}
 $$
 
