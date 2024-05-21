@@ -60,7 +60,7 @@ $$
 \mathcal{Q}(w)=
 \begin{cases}
 \left\lfloor\frac{w}{\mathit{\Delta}}+\frac{1}{2}\right\rfloor\mathit{\Delta}& \left(w\geqq\frac{\mathit{\Delta}}{2}\right)\\
-\left\lceil\frac{w}{\mathit{\Delta}}-\frac{1}{2}\right\rfloor\mathit{\Delta}& \left(w\leqq-\frac{\mathit{\Delta}}{2}\right).
+\left\lceil\frac{w}{\mathit{\Delta}}-\frac{1}{2}\right\rceil\mathit{\Delta}& \left(w\leqq-\frac{\mathit{\Delta}}{2}\right).
 \end{cases}
 $$
 
@@ -99,3 +99,82 @@ $$
 We construct lookup table for $(i,j)$ satisfies $k\mathit{\Delta}=\mathcal{R}(i\mathit{\Delta},j\mathit{\Delta})$ before evolution calculation.
 
 Above all, we execute quantized density evolution of pdfs variable node update and check node update back and forth.
+
+## Irregular LDPC specifications
+
+An irregular LDPC code's profile is specified by degree distribution polynomials. Variable node degree distribution polynomial in edge perspective is defined by
+
+$$
+\lambda(x)=\sum_{i}\lambda_{i}x^{i-1}
+$$
+
+and check node degree distribution polynomial is defined by
+
+$$
+\rho(x)=\sum_{i}\rho_{i}x^{i-1}.
+$$
+
+Where $0\leqq\lambda_{i},\rho_{i} < 1$ and 
+
+$$
+\begin{aligned}
+\lambda(1) &=\sum_{i}\lambda_{i} = 1\\
+\rho(1)&=\sum_{i}\rho_{i} = 1.
+\end{aligned}
+$$
+
+I expressed degree distribution polynomial by a json file. For example, $(3,6)-$ regular LDPC code's degree distribution polynomials are shown as follows:
+
+$$
+\begin{aligned}
+\lambda(x) &= x^{2}\\
+\rho(x)&=x^{5}.
+\end{aligned}
+$$
+
+And an example of optimized irregular LDPC code's degree distribution polynomials are
+
+$$
+\begin{aligned}
+\lambda(x)&=0.18411x+0.50891x^{2}+0.09001x^{14}+0.21697x^{15}\\
+\rho(x)&=0.5x^{3}+0.5x^{4}.
+\end{aligned}
+$$
+
+The content of json file corresponding to the first example is shonw below.
+
+```
+{
+    "degree_distribution":
+    {
+        "lambda":
+            [{"degree": 2, "weight": 1.0}],
+        "rho":
+            [{"degree": 5, "weight": 1.0}]
+    }
+}
+```
+
+The content of json file corresponding to the second example is shown below.
+
+```
+{
+    "degree_distribution":
+    {
+        "lambda":
+        [
+                {"degree": 1, "weight": 0.18411},
+                {"degree": 2, "weight": 0.50891},
+                {"degree": 14, "weight": 0.09001},
+                {"degree": 15, "weight": 0.21697}
+        ],
+        "rho":
+            [
+                {"degree": 3, "weight": 0.5},
+                {"degree": 4, "weight": 0.5}
+            ]
+    }
+}
+```
+
+This program read these json file and reflect density evolution update rules.
