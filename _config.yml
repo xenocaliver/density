@@ -2,3 +2,5 @@ theme: jekyll-theme-cayman
 layout: default
 markdown: kramdown
 usemathjax: true
+plugins:
+  - jekyll-sitemap
