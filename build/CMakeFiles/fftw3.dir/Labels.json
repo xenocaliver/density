@@ -1,0 +1,43 @@
+{
+	"sources" : 
+	[
+		{
+			"file" : "/Users/jason/workspace/density/build/CMakeFiles/fftw3"
+		},
+		{
+			"file" : "/Users/jason/workspace/density/build/CMakeFiles/fftw3.rule"
+		},
+		{
+			"file" : "/Users/jason/workspace/density/build/CMakeFiles/fftw3-complete.rule"
+		},
+		{
+			"file" : "/Users/jason/workspace/density/build/fftw3/src/fftw3-stamp/fftw3-build.rule"
+		},
+		{
+			"file" : "/Users/jason/workspace/density/build/fftw3/src/fftw3-stamp/fftw3-configure.rule"
+		},
+		{
+			"file" : "/Users/jason/workspace/density/build/fftw3/src/fftw3-stamp/fftw3-download.rule"
+		},
+		{
+			"file" : "/Users/jason/workspace/density/build/fftw3/src/fftw3-stamp/fftw3-install.rule"
+		},
+		{
+			"file" : "/Users/jason/workspace/density/build/fftw3/src/fftw3-stamp/fftw3-mkdir.rule"
+		},
+		{
+			"file" : "/Users/jason/workspace/density/build/fftw3/src/fftw3-stamp/fftw3-patch.rule"
+		},
+		{
+			"file" : "/Users/jason/workspace/density/build/fftw3/src/fftw3-stamp/fftw3-update.rule"
+		}
+	],
+	"target" : 
+	{
+		"labels" : 
+		[
+			"fftw3"
+		],
+		"name" : "fftw3"
+	}
+}

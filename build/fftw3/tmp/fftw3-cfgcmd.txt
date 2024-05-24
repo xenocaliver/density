@@ -1,0 +1,1 @@
+cmd='cd;/Users/jason/workspace/density/build/fftw3/src;&&;tar;xvfz;/Users/jason/workspace/density/build/fftw3/tarballs/fftw-3.3.10.tar.gz;&&;cd;/Users/jason/workspace/density/build/fftw3/src/fftw-3.3.10;&&;./configure;--enable-threads;&&;make'

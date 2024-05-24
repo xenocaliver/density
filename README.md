@@ -36,7 +36,7 @@ Run demo program as follows.
 ./density <degree distribution polynomial json file> <sigma>
 ```
 
-## Impliementation details
+## Implimentation details
 I implemented [Chung](https://ieeexplore.ieee.org/document/905935)'s denisty evolution method. And this program is fork of Professor [Wadayama](https://wadayama.github.io)'s code.
 I added GUI plotting pdf(probability density function) convergence process and adopted to irregular LDPC codes. 
 

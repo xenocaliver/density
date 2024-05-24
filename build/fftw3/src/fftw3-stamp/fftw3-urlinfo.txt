@@ -1,0 +1,12 @@
+# This is a generated file and its contents are an internal implementation detail.
+# The download step will be re-executed if anything in this file changes.
+# No other meaning or use of this file is supported.
+
+method=url
+command=/opt/homebrew/Cellar/cmake/3.29.3/bin/cmake;-P;/Users/jason/workspace/density/build/fftw3/src/fftw3-stamp/download-fftw3.cmake;COMMAND;/opt/homebrew/Cellar/cmake/3.29.3/bin/cmake;-P;/Users/jason/workspace/density/build/fftw3/src/fftw3-stamp/verify-fftw3.cmake
+source_dir=/Users/jason/workspace/density/build/fftw3/src
+work_dir=/Users/jason/workspace/density/build/fftw3
+url(s)=https://www.fftw.org/fftw-3.3.10.tar.gz
+hash=MD5=8ccbf6a5ea78a16dbc3e1306e234cc5c
+no_extract=true
+

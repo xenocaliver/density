@@ -1,0 +1,50 @@
+[
+{
+  "directory": "/Users/jason/workspace/density/build",
+  "command": "/Library/Developer/CommandLineTools/usr/bin/c++ -DQT_CORE_LIB -DQT_GUI_LIB -DQT_WIDGETS_LIB -I/Users/jason/workspace/density/build -I/Users/jason/workspace/density -I/Users/jason/workspace/density/build/density_autogen/include -I/Users/jason/workspace/density/. -iframework /opt/homebrew/lib -isystem /opt/homebrew/lib/QtWidgets.framework/Headers -isystem /opt/homebrew/lib/QtCore.framework/Headers -isystem /opt/homebrew/share/qt/mkspecs/macx-clang -isystem /opt/homebrew/include -isystem /opt/homebrew/lib/QtGui.framework/Headers -O3 -Wall -g -fPIC -fmessage-length=0 -I/usr/local/include -I/opt/homebrew/include -I/opt/homebrew/Cellar/qwt/6.3.0/lib/qwt.framework/Versions/6/Headers/ -I/Users/jason/workspace/density/build/include -L/opt/homebrew/lib -g -std=gnu++20 -arch arm64 -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX14.4.sdk -o CMakeFiles/density.dir/density_autogen/mocs_compilation.cpp.o -c /Users/jason/workspace/density/build/density_autogen/mocs_compilation.cpp",
+  "file": "/Users/jason/workspace/density/build/density_autogen/mocs_compilation.cpp",
+  "output": "CMakeFiles/density.dir/density_autogen/mocs_compilation.cpp.o"
+},
+{
+  "directory": "/Users/jason/workspace/density/build",
+  "command": "/Library/Developer/CommandLineTools/usr/bin/c++ -DQT_CORE_LIB -DQT_GUI_LIB -DQT_WIDGETS_LIB -I/Users/jason/workspace/density/build -I/Users/jason/workspace/density -I/Users/jason/workspace/density/build/density_autogen/include -I/Users/jason/workspace/density/. -iframework /opt/homebrew/lib -isystem /opt/homebrew/lib/QtWidgets.framework/Headers -isystem /opt/homebrew/lib/QtCore.framework/Headers -isystem /opt/homebrew/share/qt/mkspecs/macx-clang -isystem /opt/homebrew/include -isystem /opt/homebrew/lib/QtGui.framework/Headers -O3 -Wall -g -fPIC -fmessage-length=0 -I/usr/local/include -I/opt/homebrew/include -I/opt/homebrew/Cellar/qwt/6.3.0/lib/qwt.framework/Versions/6/Headers/ -I/Users/jason/workspace/density/build/include -L/opt/homebrew/lib -g -std=gnu++20 -arch arm64 -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX14.4.sdk -o CMakeFiles/density.dir/density.cpp.o -c /Users/jason/workspace/density/density.cpp",
+  "file": "/Users/jason/workspace/density/density.cpp",
+  "output": "CMakeFiles/density.dir/density.cpp.o"
+},
+{
+  "directory": "/Users/jason/workspace/density/build",
+  "command": "/Library/Developer/CommandLineTools/usr/bin/c++ -DQT_CORE_LIB -DQT_GUI_LIB -DQT_WIDGETS_LIB -I/Users/jason/workspace/density/build -I/Users/jason/workspace/density -I/Users/jason/workspace/density/build/density_autogen/include -I/Users/jason/workspace/density/. -iframework /opt/homebrew/lib -isystem /opt/homebrew/lib/QtWidgets.framework/Headers -isystem /opt/homebrew/lib/QtCore.framework/Headers -isystem /opt/homebrew/share/qt/mkspecs/macx-clang -isystem /opt/homebrew/include -isystem /opt/homebrew/lib/QtGui.framework/Headers -O3 -Wall -g -fPIC -fmessage-length=0 -I/usr/local/include -I/opt/homebrew/include -I/opt/homebrew/Cellar/qwt/6.3.0/lib/qwt.framework/Versions/6/Headers/ -I/Users/jason/workspace/density/build/include -L/opt/homebrew/lib -g -std=gnu++20 -arch arm64 -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX14.4.sdk -o CMakeFiles/density.dir/plot.cpp.o -c /Users/jason/workspace/density/plot.cpp",
+  "file": "/Users/jason/workspace/density/plot.cpp",
+  "output": "CMakeFiles/density.dir/plot.cpp.o"
+},
+{
+  "directory": "/Users/jason/workspace/density/build",
+  "command": "/Library/Developer/CommandLineTools/usr/bin/c++ -DQT_CORE_LIB -DQT_GUI_LIB -DQT_WIDGETS_LIB -I/Users/jason/workspace/density/build -I/Users/jason/workspace/density -I/Users/jason/workspace/density/build/density_autogen/include -I/Users/jason/workspace/density/. -iframework /opt/homebrew/lib -isystem /opt/homebrew/lib/QtWidgets.framework/Headers -isystem /opt/homebrew/lib/QtCore.framework/Headers -isystem /opt/homebrew/share/qt/mkspecs/macx-clang -isystem /opt/homebrew/include -isystem /opt/homebrew/lib/QtGui.framework/Headers -O3 -Wall -g -fPIC -fmessage-length=0 -I/usr/local/include -I/opt/homebrew/include -I/opt/homebrew/Cellar/qwt/6.3.0/lib/qwt.framework/Versions/6/Headers/ -I/Users/jason/workspace/density/build/include -L/opt/homebrew/lib -g -std=gnu++20 -arch arm64 -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX14.4.sdk -o CMakeFiles/density.dir/load_json.cpp.o -c /Users/jason/workspace/density/load_json.cpp",
+  "file": "/Users/jason/workspace/density/load_json.cpp",
+  "output": "CMakeFiles/density.dir/load_json.cpp.o"
+},
+{
+  "directory": "/Users/jason/workspace/density/build",
+  "command": "/Library/Developer/CommandLineTools/usr/bin/c++ -DQT_CORE_LIB -DQT_GUI_LIB -DQT_WIDGETS_LIB -I/Users/jason/workspace/density/build -I/Users/jason/workspace/density -I/Users/jason/workspace/density/build/biterror_autogen/include -I/Users/jason/workspace/density/. -iframework /opt/homebrew/lib -isystem /opt/homebrew/lib/QtWidgets.framework/Headers -isystem /opt/homebrew/lib/QtCore.framework/Headers -isystem /opt/homebrew/share/qt/mkspecs/macx-clang -isystem /opt/homebrew/include -isystem /opt/homebrew/lib/QtGui.framework/Headers -O3 -Wall -g -fPIC -fmessage-length=0 -I/usr/local/include -I/opt/homebrew/include -I/opt/homebrew/Cellar/qwt/6.3.0/lib/qwt.framework/Versions/6/Headers/ -I/Users/jason/workspace/density/build/include -L/opt/homebrew/lib -g -std=gnu++20 -arch arm64 -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX14.4.sdk -o CMakeFiles/biterror.dir/biterror_autogen/mocs_compilation.cpp.o -c /Users/jason/workspace/density/build/biterror_autogen/mocs_compilation.cpp",
+  "file": "/Users/jason/workspace/density/build/biterror_autogen/mocs_compilation.cpp",
+  "output": "CMakeFiles/biterror.dir/biterror_autogen/mocs_compilation.cpp.o"
+},
+{
+  "directory": "/Users/jason/workspace/density/build",
+  "command": "/Library/Developer/CommandLineTools/usr/bin/c++ -DQT_CORE_LIB -DQT_GUI_LIB -DQT_WIDGETS_LIB -I/Users/jason/workspace/density/build -I/Users/jason/workspace/density -I/Users/jason/workspace/density/build/biterror_autogen/include -I/Users/jason/workspace/density/. -iframework /opt/homebrew/lib -isystem /opt/homebrew/lib/QtWidgets.framework/Headers -isystem /opt/homebrew/lib/QtCore.framework/Headers -isystem /opt/homebrew/share/qt/mkspecs/macx-clang -isystem /opt/homebrew/include -isystem /opt/homebrew/lib/QtGui.framework/Headers -O3 -Wall -g -fPIC -fmessage-length=0 -I/usr/local/include -I/opt/homebrew/include -I/opt/homebrew/Cellar/qwt/6.3.0/lib/qwt.framework/Versions/6/Headers/ -I/Users/jason/workspace/density/build/include -L/opt/homebrew/lib -g -std=gnu++20 -arch arm64 -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX14.4.sdk -o CMakeFiles/biterror.dir/biterror.cpp.o -c /Users/jason/workspace/density/biterror.cpp",
+  "file": "/Users/jason/workspace/density/biterror.cpp",
+  "output": "CMakeFiles/biterror.dir/biterror.cpp.o"
+},
+{
+  "directory": "/Users/jason/workspace/density/build",
+  "command": "/Library/Developer/CommandLineTools/usr/bin/c++ -DQT_CORE_LIB -DQT_GUI_LIB -DQT_WIDGETS_LIB -I/Users/jason/workspace/density/build -I/Users/jason/workspace/density -I/Users/jason/workspace/density/build/biterror_autogen/include -I/Users/jason/workspace/density/. -iframework /opt/homebrew/lib -isystem /opt/homebrew/lib/QtWidgets.framework/Headers -isystem /opt/homebrew/lib/QtCore.framework/Headers -isystem /opt/homebrew/share/qt/mkspecs/macx-clang -isystem /opt/homebrew/include -isystem /opt/homebrew/lib/QtGui.framework/Headers -O3 -Wall -g -fPIC -fmessage-length=0 -I/usr/local/include -I/opt/homebrew/include -I/opt/homebrew/Cellar/qwt/6.3.0/lib/qwt.framework/Versions/6/Headers/ -I/Users/jason/workspace/density/build/include -L/opt/homebrew/lib -g -std=gnu++20 -arch arm64 -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX14.4.sdk -o CMakeFiles/biterror.dir/plot.cpp.o -c /Users/jason/workspace/density/plot.cpp",
+  "file": "/Users/jason/workspace/density/plot.cpp",
+  "output": "CMakeFiles/biterror.dir/plot.cpp.o"
+},
+{
+  "directory": "/Users/jason/workspace/density/build",
+  "command": "/Library/Developer/CommandLineTools/usr/bin/c++ -DQT_CORE_LIB -DQT_GUI_LIB -DQT_WIDGETS_LIB -I/Users/jason/workspace/density/build -I/Users/jason/workspace/density -I/Users/jason/workspace/density/build/biterror_autogen/include -I/Users/jason/workspace/density/. -iframework /opt/homebrew/lib -isystem /opt/homebrew/lib/QtWidgets.framework/Headers -isystem /opt/homebrew/lib/QtCore.framework/Headers -isystem /opt/homebrew/share/qt/mkspecs/macx-clang -isystem /opt/homebrew/include -isystem /opt/homebrew/lib/QtGui.framework/Headers -O3 -Wall -g -fPIC -fmessage-length=0 -I/usr/local/include -I/opt/homebrew/include -I/opt/homebrew/Cellar/qwt/6.3.0/lib/qwt.framework/Versions/6/Headers/ -I/Users/jason/workspace/density/build/include -L/opt/homebrew/lib -g -std=gnu++20 -arch arm64 -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX14.4.sdk -o CMakeFiles/biterror.dir/load_json.cpp.o -c /Users/jason/workspace/density/load_json.cpp",
+  "file": "/Users/jason/workspace/density/load_json.cpp",
+  "output": "CMakeFiles/biterror.dir/load_json.cpp.o"
+}
+]
