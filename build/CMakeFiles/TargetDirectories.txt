@@ -1,9 +1,0 @@
-/Users/jason/workspace/density/build/CMakeFiles/fftw3.dir
-/Users/jason/workspace/density/build/CMakeFiles/density.dir
-/Users/jason/workspace/density/build/CMakeFiles/biterror.dir
-/Users/jason/workspace/density/build/CMakeFiles/edit_cache.dir
-/Users/jason/workspace/density/build/CMakeFiles/rebuild_cache.dir
-/Users/jason/workspace/density/build/CMakeFiles/density_autogen_timestamp_deps.dir
-/Users/jason/workspace/density/build/CMakeFiles/density_autogen.dir
-/Users/jason/workspace/density/build/CMakeFiles/biterror_autogen_timestamp_deps.dir
-/Users/jason/workspace/density/build/CMakeFiles/biterror_autogen.dir
