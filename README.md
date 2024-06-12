@@ -1,5 +1,5 @@
 # density evolution demo program
-
+This program is a density evolution demo program for Low-Density Parity Check(LDPC) codes. This program can evaluate performance of regular and irregular LDPC codes and shows probability distribution function of Log-Likelihood ratio on GUI.
 ## Preparation
 Install following tools.
 - gcc, g++
